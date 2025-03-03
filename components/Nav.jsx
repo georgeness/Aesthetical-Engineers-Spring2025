@@ -4,66 +4,95 @@ import Link from "next/link";
 import Image from "next/image";
 
 const Nav = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
+  // State for toggling the mobile menu
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="w-full bg-white border-b border-gray-200 p-4 flex flex-col md:flex-row md:items-center md:justify-between">
-      {/* Logo / Brand */}
-      <div className="flex items-center justify-between">
+    <>
+      {/* -- Desktop Nav: EXACTLY AS YOU PROVIDED -- */}
+      <nav className="hidden md:flex flex-between w-full mb-16 pt-7 px-4">
         <Link href="/" className="flex gap-2 flex-center">
           <Image
             src="/images/other/signature.png"
             alt="signature"
-            width={150}
-            height={80}
+            width={300}
+            height={200}
             className="object-fit"
           />
         </Link>
-        {/* Hamburger Icon */}
-        <button
-          type="button"
-          className="md:hidden text-gray-700"
-          onClick={toggleMobileMenu}
-        >
-          {/* Simple icon - or import any icon library */}
-          <svg className="h-6 w-6" fill="none" stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
-      </div>
-
-      {/* Nav Links */}
-      <div
-        className={`${
-          mobileMenuOpen ? "block" : "hidden"
-        } mt-4 md:mt-0 md:flex md:items-center`}
-      >
-        <Link href="/" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 md:inline-block">
+        <Link href="/" className="flex gap-2 flex-center">
           Home
         </Link>
-        <Link href="/Collection" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 md:inline-block">
+        <Link href="/Collection" className="flex gap-2 flex-center">
           Collection
         </Link>
-        <Link href="/exhibitions" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 md:inline-block">
+        <Link href="/exhibitions" className="flex gap-2 flex-center">
           Awards & Exhibitions
         </Link>
-        <Link href="/contact" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 md:inline-block">
+        <Link href="/contact" className="flex gap-2 flex-center">
           Contact
         </Link>
-        <Link href="/login" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 md:inline-block">
+        <Link href="/login" className="flex gap-2 flex-center">
           Login
         </Link>
-      </div>
-    </nav>
+      </nav>
+
+      {/* -- Mobile Nav (shown only if width < md) -- */}
+      <nav className="md:hidden w-full px-4 mb-4">
+        {/* Top bar with logo & hamburger button */}
+        <div className="flex items-center justify-between pt-4">
+          <Link href="/" className="flex gap-2 flex-center">
+            <Image
+              src="/images/other/signature.png"
+              alt="signature"
+              width={120}
+              height={80}
+              className="object-fit"
+            />
+          </Link>
+          {/* Hamburger Icon */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="text-gray-700 focus:outline-none"
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* Mobile Menu Links */}
+        {isOpen && (
+          <div className="flex flex-col mt-2 space-y-2">
+            <Link href="/" className="flex gap-2 flex-center">
+              Home
+            </Link>
+            <Link href="/Collection" className="flex gap-2 flex-center">
+              Collection
+            </Link>
+            <Link href="/exhibitions" className="flex gap-2 flex-center">
+              Awards & Exhibitions
+            </Link>
+            <Link href="/contact" className="flex gap-2 flex-center">
+              Contact
+            </Link>
+            <Link href="/login" className="flex gap-2 flex-center">
+              Login
+            </Link>
+          </div>
+        )}
+      </nav>
+    </>
   );
 };
 
