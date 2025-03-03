@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ImageCarousel } from "../components/ImageCarousel.tsx";
 
 /**
- * Full list of images for the carousel
+ *Full list of images for the carousel
  */
 const CAROUSEL = [
   "/images/Matrix 125.jpg",
