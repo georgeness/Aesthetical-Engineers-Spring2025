@@ -22,7 +22,7 @@ export const metadata = {
     "modern art",
     "George Lupo",
     "art for sale",
-    "visual artist"
+    "visual artist",
   ],
 };
 
@@ -30,6 +30,9 @@ function RootLayout({ children }) {
   return (
     <html lang="en" className={inter.variable}>
       <head>
+        {/* 1. Mobile-Friendly Meta Tag */}
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
         <link
           rel="apple-touch-icon"
           sizes="180x180"
