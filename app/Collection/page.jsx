@@ -131,14 +131,14 @@ const PaintingLibrary = () => {
 
   // Function to navigate to previous painting
   const prevPainting = () => {
-    const newIndex = (currentIndex === 0) ? paintings.length - 1 : currentIndex - 1;
+    const newIndex = currentIndex === 0 ? paintings.length - 1 : currentIndex - 1;
     setCurrentIndex(newIndex);
     setSelectedPainting(paintings[newIndex]);
   };
 
   // Function to navigate to next painting
   const nextPainting = () => {
-    const newIndex = (currentIndex === paintings.length - 1) ? 0 : currentIndex + 1;
+    const newIndex = currentIndex === paintings.length - 1 ? 0 : currentIndex + 1;
     setCurrentIndex(newIndex);
     setSelectedPainting(paintings[newIndex]);
   };
@@ -146,31 +146,44 @@ const PaintingLibrary = () => {
   return (
     <section className="w-full flex flex-col items-center py-4">
       <h1 className="head_text text-center">Painting Library</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-9 w-full px-4">
+      
+      {/* Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-9 w-full px-4">
         {paintings.map((painting, index) => (
-          <div key={painting.id} className="bg-white p-4 rounded-xl shadow hover:shadow-lg transition duration-300">
-            <img 
-              src={painting.image} 
-              alt={painting.title} 
+          <div
+            key={painting.id}
+            className="bg-white p-4 rounded-xl shadow hover:shadow-lg transition duration-300"
+          >
+            <img
+              src={painting.image}
+              alt={painting.title}
               className="w-full h-auto mb-4 rounded cursor-pointer transform hover:scale-105 transition duration-300"
               onClick={() => openModal(index)}
             />
-            <h2 className="text-xl font-bold mb-2">{painting.title}</h2>
-            <p className="text-sm text-gray-600"><strong>Dimensions:</strong> {painting.dimensions}</p>
-            <p className="text-sm text-gray-600"><strong>Medium:</strong> {painting.medium}</p>
-            <p className="text-sm text-gray-600"><strong>Notes:</strong> {painting.notes}</p>
-            <p className="text-sm font-semibold text-gray-800"><strong>Price:</strong> {painting.price}</p>
+            <h2 className="text-lg md:text-xl font-bold mb-2">{painting.title}</h2>
+            <p className="text-sm text-gray-600 mb-1">
+              <strong>Dimensions:</strong> {painting.dimensions}
+            </p>
+            <p className="text-sm text-gray-600 mb-1">
+              <strong>Medium:</strong> {painting.medium}
+            </p>
+            <p className="text-sm text-gray-600 mb-1">
+              <strong>Notes:</strong> {painting.notes}
+            </p>
+            <p className="text-sm font-semibold text-gray-800">
+              <strong>Price:</strong> {painting.price}
+            </p>
           </div>
         ))}
       </div>
 
       {/* Modal (Popup View) */}
       {selectedPainting && (
-        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-75 z-50">
-          <div className="relative bg-white p-6 rounded-2xl shadow-2xl max-w-2xl w-full">
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-75 z-50 px-4">
+          <div className="relative bg-white p-6 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Close Button */}
-            <button 
-              onClick={closeModal} 
+            <button
+              onClick={closeModal}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
             >
               &times;
@@ -178,35 +191,43 @@ const PaintingLibrary = () => {
 
             <div className="relative">
               {/* Previous Arrow */}
-              <button 
-                onClick={prevPainting} 
+              <button
+                onClick={prevPainting}
                 className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-700 to-gray-900 text-white p-3 rounded-full hover:scale-110 transition duration-300 shadow-lg"
               >
                 &#9664;
               </button>
 
               {/* Next Arrow */}
-              <button 
-                onClick={nextPainting} 
+              <button
+                onClick={nextPainting}
                 className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-700 to-gray-900 text-white p-3 rounded-full hover:scale-110 transition duration-300 shadow-lg"
               >
                 &#9654;
               </button>
 
-              <img 
-                src={selectedPainting.image} 
-                alt={selectedPainting.title} 
+              <img
+                src={selectedPainting.image}
+                alt={selectedPainting.title}
                 className="w-full h-auto rounded-lg"
               />
             </div>
 
             {/* Painting Details */}
             <div className="mt-6 text-center">
-              <h2 className="text-2xl font-bold mb-2">{selectedPainting.title}</h2>
-              <p className="text-base text-gray-600"><strong>Dimensions:</strong> {selectedPainting.dimensions}</p>
-              <p className="text-base text-gray-600"><strong>Medium:</strong> {selectedPainting.medium}</p>
-              <p className="text-base text-gray-600"><strong>Notes:</strong> {selectedPainting.notes}</p>
-              <p className="text-lg font-semibold text-gray-800 mt-2"><strong>Price:</strong> {selectedPainting.price}</p>
+              <h2 className="text-xl font-bold mb-2">{selectedPainting.title}</h2>
+              <p className="text-base text-gray-600">
+                <strong>Dimensions:</strong> {selectedPainting.dimensions}
+              </p>
+              <p className="text-base text-gray-600">
+                <strong>Medium:</strong> {selectedPainting.medium}
+              </p>
+              <p className="text-base text-gray-600">
+                <strong>Notes:</strong> {selectedPainting.notes}
+              </p>
+              <p className="text-lg font-semibold text-gray-800 mt-2">
+                <strong>Price:</strong> {selectedPainting.price}
+              </p>
             </div>
           </div>
         </div>
