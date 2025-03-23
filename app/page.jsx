@@ -26,47 +26,54 @@ const HomePage = () => {
     <main className="w-full flex flex-col items-center justify-center p-6">
       {/* Welcome Section */}
       <section className="w-full flex flex-col items-center text-center">
-        <h1
-          className="
-            mt-2
-            font-bold
-            transition-opacity
-            duration-700
-            opacity-90
-            text-4xl
-            sm:text-5xl
-            md:text-6xl
-            lg:text-7xl
-            leading-tight
-            max-w-xs
-            sm:max-w-lg
-            md:max-w-2xl
-            mx-auto
-            break-words
-          "
-        >
-          Welcome
-          <br className="hidden sm:block" />
-          <span
-            className="
-              bg-gradient-to-r
-              from-orange-500
-              to-yellow-400
-              bg-clip-text
-              text-transparent
-              font-extrabold
-              text-5xl
-              sm:text-6xl
-              md:text-7xl
-              lg:text-8xl
-              leading-tight
-              break-words
-              block
-            "
-          >
-            Paintings
-          </span>
-        </h1>
+      <h1
+  className="
+    relative
+    -top-2
+    font-bold
+    transition-opacity
+    duration-700
+    opacity-90
+    text-4xl
+    sm:text-5xl
+    md:text-6xl
+    lg:text-7xl
+    leading-snug
+    max-w-xs
+    sm:max-w-lg
+    md:max-w-2xl
+    mx-auto
+    break-words
+  "
+>
+  Welcome
+  <br className="hidden sm:block" />
+  <span
+  className="
+    relative
+    top-2
+    bg-gradient-to-r
+    from-orange-500
+    to-yellow-400
+    bg-clip-text
+    text-transparent
+    font-extrabold
+    text-5xl
+    sm:text-6xl
+    md:text-7xl
+    lg:text-8xl
+    leading-none
+    break-words
+    block
+    align-baseline
+  "
+>
+  Paintings
+</span>
+
+
+</h1>
+
 
         {/* Image Carousel */}
         <div className="w-full max-w-4xl mt-6 animate-fadeIn px-2 sm:px-6">
