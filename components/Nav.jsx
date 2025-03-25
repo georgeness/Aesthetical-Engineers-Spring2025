@@ -23,7 +23,7 @@ const Nav = () => {
         <Link href="/" className="flex gap-2 flex-center">
           Home
         </Link>
-        <Link href="/Collection" className="flex gap-2 flex-center">
+        <Link href="/collection" className="flex gap-2 flex-center">
           Collection
         </Link>
         <Link href="/exhibitions" className="flex gap-2 flex-center">
