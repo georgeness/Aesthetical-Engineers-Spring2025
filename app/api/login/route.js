@@ -9,8 +9,10 @@ export const POST = async (req) => {
     // Connect to the database
     await connectToDB();
 
-    // Find user in the database
-    const user = await User.findOne({ username });
+    // Find user in the database - using case-insensitive query
+    const user = await User.findOne({ 
+      username: { $regex: new RegExp(`^${username}$`, 'i') } 
+    });
 
     if (!user) {
       return new Response(
