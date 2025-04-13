@@ -80,8 +80,8 @@ const HomePage = () => {
           <ImageCarousel imageUrls={CAROUSEL} />
         </div>
 
-        {/* About Me Button */}
-        <div className="w-full flex justify-center mt-6">
+        {/* Buttons */}
+        <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-4 mt-6">
           <Link href="/about">
             <button
               className="
@@ -97,9 +97,41 @@ const HomePage = () => {
                 transition-transform
                 hover:scale-105
                 hover:shadow-2xl
+                w-full
+                sm:w-auto
               "
             >
               About Me
+            </button>
+          </Link>
+          
+          <Link href="/museum">
+            <button
+              className="
+                px-8
+                py-3
+                bg-gradient-to-r
+                from-purple-500
+                to-indigo-600
+                text-white
+                font-semibold
+                rounded-full
+                shadow-xl
+                transition-transform
+                hover:scale-105
+                hover:shadow-2xl
+                w-full
+                sm:w-auto
+                flex
+                items-center
+                justify-center
+                gap-2
+              "
+            >
+              <span>Interactive Museum</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
             </button>
           </Link>
         </div>
