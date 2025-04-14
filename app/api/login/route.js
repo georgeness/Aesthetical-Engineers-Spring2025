@@ -16,7 +16,7 @@ export const POST = async (req) => {
 
     if (!user) {
       return new Response(
-        JSON.stringify({ message: 'Invalid username or password' }),
+        JSON.stringify({ message: 'Invalid username' }),
         { status: 401 }
       );
     }
@@ -26,7 +26,7 @@ export const POST = async (req) => {
 
     if (!isPasswordCorrect) {
       return new Response(
-        JSON.stringify({ message: 'Invalid username or password' }),
+        JSON.stringify({ message: 'Invalid password' }),
         { status: 401 }
       );
     }
