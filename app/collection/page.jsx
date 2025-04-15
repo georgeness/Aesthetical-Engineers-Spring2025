@@ -924,9 +924,9 @@ const PaintingLibrary = () => {
               transition={{ duration: 0.3, delay: index * 0.05 }}
             >
               <div className="relative group">
-                <img
-                  src={painting.image}
-                  alt={painting.title}
+            <img
+              src={painting.image}
+              alt={painting.title}
                   className="w-full h-auto mb-4 rounded cursor-pointer transform transition duration-300 group-hover:brightness-90"
                   onClick={() => openModal(paintings.findIndex(p => p.id === painting.id))}
                 />
@@ -951,13 +951,13 @@ const PaintingLibrary = () => {
                   </button>
                 </div>
               </div>
-              <h2 className="text-lg md:text-xl font-bold mb-2">{painting.title}</h2>
+            <h2 className="text-lg md:text-xl font-bold mb-2">{painting.title}</h2>
               <p className={`text-sm ${theme.secondary} mb-1`}>
                 <strong>Medium:</strong> {painting.medium}
               </p>
               <p className={`text-sm ${theme.secondary} mb-1`}>
-                <strong>Dimensions:</strong> {painting.dimensions}
-              </p>
+              <strong>Dimensions:</strong> {painting.dimensions}
+            </p>
               <p className="text-sm font-semibold mt-2">
                 <strong>Price:</strong> {painting.price}
               </p>
@@ -1010,19 +1010,19 @@ const PaintingLibrary = () => {
                   <h2 className="text-lg md:text-xl font-bold mb-1">{painting.title}</h2>
                   <div className="grid grid-cols-2 gap-2 mb-2">
                     <p className={`text-sm ${theme.secondary}`}>
-                      <strong>Medium:</strong> {painting.medium}
-                    </p>
+              <strong>Medium:</strong> {painting.medium}
+            </p>
                     <p className={`text-sm ${theme.secondary}`}>
                       <strong>Dimensions:</strong> {painting.dimensions}
                     </p>
                   </div>
                   <p className={`text-sm ${theme.secondary} mb-2`}>
-                    <strong>Notes:</strong> {painting.notes}
-                  </p>
+              <strong>Notes:</strong> {painting.notes}
+            </p>
                   <div className="flex justify-between items-center">
                     <p className="text-lg font-semibold">
-                      <strong>Price:</strong> {painting.price}
-                    </p>
+              <strong>Price:</strong> {painting.price}
+            </p>
                     <button 
                       onClick={() => openModal(paintings.findIndex(p => p.id === painting.id))}
                       className={`px-3 py-1 ${theme.button} text-white rounded-md text-sm`}
@@ -1031,10 +1031,10 @@ const PaintingLibrary = () => {
                     </button>
                   </div>
                 </div>
-              </div>
+          </div>
             </motion.div>
-          ))}
-        </div>
+        ))}
+      </div>
       )}
 
       {/* Modal (Popup View) */}
@@ -1045,7 +1045,7 @@ const PaintingLibrary = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-75 z-50 px-4"
-            onClick={closeModal}
+              onClick={closeModal}
           >
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
@@ -1087,13 +1087,13 @@ const PaintingLibrary = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                           </svg>
                         </button>
-                        <button
+              <button
                           onClick={resetZoom}
                           className={`p-2 rounded-full ${darkMode ? 'bg-gray-800' : 'bg-white'} text-gray-700 shadow-md`}
-                        >
+              >
                           <ArrowsPointingOutIcon className="h-5 w-5" />
-                        </button>
-                        
+              </button>
+
                         {/* AR View Toggle */}
                         <button
                           onClick={toggleARMode}
@@ -1128,7 +1128,6 @@ const PaintingLibrary = () => {
                       <div 
                         className="relative h-[40vh] md:h-[60vh] flex items-center justify-center bg-black bg-opacity-20 rounded-lg overflow-hidden"
                         onMouseDown={handleMouseDown}
-                        style={{ cursor: zoomLevel > 1 ? 'grab' : 'default' }}
                       >
                         <img
                           ref={modalImageRef}
@@ -1172,9 +1171,9 @@ const PaintingLibrary = () => {
                         </div>
                         
                         {/* AR Painting Image */}
-                        <img
-                          src={selectedPainting.image}
-                          alt={selectedPainting.title}
+              <img
+                src={selectedPainting.image}
+                alt={selectedPainting.title}
                           className="max-w-[80%] max-h-[80%] z-10 border-8 border-white shadow-2xl"
                           style={{ 
                             transform: 'perspective(1000px) rotateY(-5deg)',
@@ -1193,9 +1192,9 @@ const PaintingLibrary = () => {
                       </div>
                     </div>
                   )}
-                </div>
+            </div>
 
-                {/* Painting Details */}
+            {/* Painting Details */}
                 <div className={`w-full md:w-1/3 flex flex-col ${theme.secondary} overflow-y-auto`}>
                   <h2 className={`text-2xl font-bold mb-4 ${theme.text}`}>{selectedPainting.title}</h2>
                   
@@ -1210,9 +1209,9 @@ const PaintingLibrary = () => {
                       <strong className="font-semibold">Notes:</strong> {selectedPainting.notes}
                     </p>
                     <p className={`text-xl font-semibold mt-4 ${theme.text}`}>
-                      <strong>Price:</strong> {selectedPainting.price}
-                    </p>
-                  </div>
+                <strong>Price:</strong> {selectedPainting.price}
+              </p>
+            </div>
                   
                   <div className="mt-auto space-y-3">
                     <div className="grid grid-cols-2 gap-3">
@@ -1294,9 +1293,9 @@ const PaintingLibrary = () => {
                     >
                       <span>See on Interactive Wall</span>
                     </button>
-                  </div>
-                </div>
-              </div>
+            </div>
+          </div>
+        </div>
             </motion.div>
           </motion.div>
       )}

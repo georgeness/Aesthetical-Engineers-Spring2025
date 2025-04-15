@@ -2,6 +2,7 @@ import "../styles/globals.css";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import MessageWidget from "../components/MessageWidget";
+import PaintDropsEffect from "../components/PaintDropsEffect";
 import { Inter } from "next/font/google";
 
 const inter = Inter({
@@ -68,6 +69,8 @@ function RootLayout({ children }) {
           {children}
           <Footer />
           <MessageWidget />
+          {/* Paint drop effect for cursor */}
+          <PaintDropsEffect />
         </main>
       </body>
     </html>

@@ -34,7 +34,7 @@ const usePaintingsStore = create((set) => ({
       notes: "Abstract and modern.",
       price: "$2500",
       image: "/images/Matrix 141.jpg",
-      size: [3.0, 4.0]
+      size: [3.0, 3.8]
     },
     {
       id: 3,
@@ -163,19 +163,95 @@ const usePaintingsStore = create((set) => ({
 
 // --- 3D Components ---
 
+// Signature image on back wall
+function SignatureImage() {
+  const texture = useTexture('/images/other/signature.png');
+  const size = [2.8, 1.6]; // Smaller size to avoid touching paintings
+  
+  // Use anisotropic filtering for better quality at angles
+  useEffect(() => {
+    if (texture) {
+      texture.anisotropy = 16; // Max anisotropy for sharper texture at angles
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.needsUpdate = true;
+    }
+  }, [texture]);
+  
+  return (
+    <group position={[0.5, 5.0, -15.75]}>
+      <Plane 
+        args={size} 
+        position={[0, 0, 0]}
+      >
+        <meshBasicMaterial 
+          map={texture} 
+          transparent={true}
+          opacity={0.85}
+          side={THREE.DoubleSide}
+          depthWrite={false} // Prevents z-fighting
+        />
+      </Plane>
+    </group>
+  );
+}
+
+function PaintingDetails({ painting, visible, position }) {
+  const [hovered, setHovered] = useState(false);
+  
+  return visible ? (
+    <group position={position}>
+      <Html
+        transform
+        distanceFactor={2}
+        position={[0, 0, 0.1]}
+        style={{
+          width: '300px',
+          pointerEvents: 'none',
+          opacity: hovered ? 1 : 0.8,
+          transition: 'all 0.3s'
+        }}
+      >
+        <div className="bg-black bg-opacity-80 p-4 rounded-lg text-white transform -translate-x-1/2 -translate-y-1/2">
+          <h3 className="text-lg font-bold mb-2">{painting.title}</h3>
+          <p className="text-sm mb-1">{painting.medium}</p>
+          <p className="text-sm mb-2">{painting.dimensions}</p>
+          <p className="text-lg font-semibold">{painting.price}</p>
+        </div>
+      </Html>
+    </group>
+  ) : null;
+}
+
 function Painting({ painting, position, rotationY }) {
   const { setSelectedPainting } = usePaintingsStore();
   const texture = useTexture(painting.image);
   const [hovered, setHovered] = useState(false);
   const [active, setActive] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const ref = useRef();
+  const frameRef = useRef();
   const spotlightRef = useRef();
   
   // Optional spotlight helper (uncomment for development)
   // useHelper(spotlightRef, THREE.SpotLightHelper, "red");
 
+  // Show details after slight delay on hover
+  useEffect(() => {
+    let timer;
+    if (hovered) {
+      timer = setTimeout(() => {
+        setShowDetails(true);
+      }, 500);
+    } else {
+      setShowDetails(false);
+    }
+    return () => clearTimeout(timer);
+  }, [hovered]);
+
   useFrame(() => {
     if (ref.current) {
+      // Hover animation
       ref.current.scale.x = THREE.MathUtils.lerp(ref.current.scale.x, hovered ? 1.05 : 1, 0.1);
       ref.current.scale.y = THREE.MathUtils.lerp(ref.current.scale.y, hovered ? 1.05 : 1, 0.1);
     }
@@ -183,23 +259,38 @@ function Painting({ painting, position, rotationY }) {
 
   return (
     <group position={position} rotation-y={rotationY}>
+      {/* Canvas with standard material (no distortion effect) */}
       <Plane
         ref={ref}
         args={[painting.size[0], painting.size[1]]}
-        onClick={(e) => { e.stopPropagation(); setSelectedPainting(painting); setActive(!active); }}
-        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
-        onPointerOut={(e) => { setHovered(false); document.body.style.cursor = 'default'; }}
+        onClick={(e) => { 
+          e.stopPropagation(); 
+          setSelectedPainting(painting); 
+          setActive(!active); 
+        }}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+        onPointerOut={(e) => { setHovered(false); }}
         position={[0, painting.size[1] / 2 + 0.5, 0.05]}
       >
-        <meshStandardMaterial map={texture} side={THREE.DoubleSide} metalness={0.2} roughness={0.8} />
+        <meshStandardMaterial 
+          map={texture} 
+          side={THREE.DoubleSide} 
+          metalness={0.1} 
+          roughness={0.8}
+          color="#FFFFFF"
+        />
       </Plane>
       
-      {/* Frame */}
-      <Box args={[painting.size[0] + 0.1, painting.size[1] + 0.1, 0.05]} position={[0, painting.size[1] / 2 + 0.5, 0.02]}>
-        <meshStandardMaterial color={hovered ? "#886644" : "#664422"} metalness={0.5} roughness={0.2} />
+      {/* Frame with static appearance */}
+      <Box 
+        ref={frameRef}
+        args={[painting.size[0] + 0.1, painting.size[1] + 0.1, 0.05]} 
+        position={[0, painting.size[1] / 2 + 0.5, 0.02]}
+      >
+        <meshStandardMaterial color={hovered ? "#444444" : "#222222"} metalness={0.5} roughness={0.2} />
       </Box>
       
-      {/* Title Plaque */}
+      {/* Title Plaque with static appearance */}
       <Text
         position={[0, 0.15, 0.1]}
         color={hovered ? "#FFFFFF" : "#EEEEEE"}
@@ -213,7 +304,14 @@ function Painting({ painting, position, rotationY }) {
         {painting.title}
       </Text>
       
-      {/* Spotlight for painting */}
+      {/* Popup details card */}
+      <PaintingDetails 
+        painting={painting} 
+        visible={showDetails} 
+        position={[0, painting.size[1] + 0.7, 0.2]}
+      />
+      
+      {/* Spotlight for painting with color change on hover */}
       <SpotLight
         ref={spotlightRef}
         position={[0, painting.size[1] * 1.2 + 0.6, 1.2]}
@@ -222,9 +320,276 @@ function Painting({ painting, position, rotationY }) {
         intensity={hovered ? 5 : 2}
         distance={8}
         castShadow
-        color="#FFFAF0"
+        color={hovered ? "#FFF5E0" : "#FFFAF0"}
         target-position={[0, painting.size[1] / 2 + 0.5, 0.05]}
       />
+    </group>
+  );
+}
+
+// Chair component for the tables
+function Chair({ position, rotation = [0, 0, 0], color = "#111111" }) {
+  // Chair dimensions
+  const seatWidth = 0.45;
+  const seatHeight = 0.45;
+  const seatDepth = 0.45;
+  const legThickness = 0.05;
+  const backHeight = 0.5;
+  
+  return (
+    <group position={position} rotation={rotation}>
+      {/* Seat */}
+      <Box 
+        args={[seatWidth, 0.05, seatDepth]} 
+        position={[0, seatHeight, 0]} 
+        castShadow
+        receiveShadow
+      >
+        <meshPhysicalMaterial 
+          color={color} 
+          metalness={0.1} 
+          roughness={0.3}
+          clearcoat={0.5}
+          clearcoatRoughness={0.15}
+          reflectivity={0.2}
+        />
+      </Box>
+      
+      {/* Chair back */}
+      <Box 
+        args={[seatWidth, backHeight, 0.05]} 
+        position={[0, seatHeight + backHeight/2, -seatDepth/2 + 0.025]} 
+        castShadow
+        receiveShadow
+      >
+        <meshPhysicalMaterial 
+          color={color} 
+          metalness={0.1} 
+          roughness={0.3}
+          clearcoat={0.5}
+          clearcoatRoughness={0.15}
+          reflectivity={0.2}
+        />
+      </Box>
+      
+      {/* Chair legs */}
+      {[
+        [-seatWidth/2 + legThickness/2, 0, -seatDepth/2 + legThickness/2],
+        [seatWidth/2 - legThickness/2, 0, -seatDepth/2 + legThickness/2],
+        [seatWidth/2 - legThickness/2, 0, seatDepth/2 - legThickness/2],
+        [-seatWidth/2 + legThickness/2, 0, seatDepth/2 - legThickness/2]
+      ].map((legPos, i) => (
+        <Box
+          key={i}
+          args={[legThickness, seatHeight, legThickness]}
+          position={[legPos[0], seatHeight/2, legPos[2]]}
+          castShadow
+          receiveShadow
+        >
+          <meshPhysicalMaterial 
+            color="#444444" 
+            metalness={0.6} 
+            roughness={0.2}
+            clearcoat={0.3}
+            reflectivity={0.7}
+          />
+        </Box>
+      ))}
+    </group>
+  );
+}
+
+// Table with chairs component
+function DiningSet({ position = [0, 0, 0], rotation = [0, Math.PI / 4, 0], scale = 1, chairColor = "#111111" }) {
+  // Try to load texture, but fallback gracefully if it fails
+  const tableTexture = useTexture('/images/textures/8.jpg', 
+    (texture) => {
+      console.log('Table texture loaded');
+    },
+    (error) => {
+      console.error('Error loading table texture:', error);
+    }
+  );
+  
+  // Set up texture parameters
+  useEffect(() => {
+    if (tableTexture) {
+      try {
+        tableTexture.wrapS = THREE.RepeatWrapping;
+        tableTexture.wrapT = THREE.RepeatWrapping;
+        tableTexture.repeat.set(1, 1);
+      } catch (err) {
+        console.error('Error setting up table texture:', err);
+      }
+    }
+  }, [tableTexture]);
+  
+  // Table dimensions - simulating a square table
+  const tableWidth = 2 * scale;
+  const tableHeight = 0.8 * scale;
+  const tableDepth = 2 * scale;
+  const legThickness = 0.1 * scale;
+  
+  // Chair positions around table
+  const chairPositions = [
+    [0, 0, -tableDepth/2 - 0.3*scale], // North
+    [0, 0, tableDepth/2 + 0.3*scale],  // South
+    [-tableWidth/2 - 0.3*scale, 0, 0], // West
+    [tableWidth/2 + 0.3*scale, 0, 0],  // East
+    [-tableWidth/2 - 0.15*scale, 0, -tableDepth/2 - 0.15*scale], // Northwest
+    [tableWidth/2 + 0.15*scale, 0, -tableDepth/2 - 0.15*scale],  // Northeast
+    [-tableWidth/2 - 0.15*scale, 0, tableDepth/2 + 0.15*scale],  // Southwest
+    [tableWidth/2 + 0.15*scale, 0, tableDepth/2 + 0.15*scale]    // Southeast
+  ];
+  
+  // Chair rotations (facing the table)
+  const chairRotations = [
+    [0, 0, 0],           // North - facing south
+    [0, Math.PI, 0],     // South - facing north
+    [0, Math.PI/2, 0],   // West - facing east
+    [0, -Math.PI/2, 0],  // East - facing west
+    [0, Math.PI/4, 0],   // Northwest
+    [0, -Math.PI/4, 0],  // Northeast
+    [0, 3*Math.PI/4, 0], // Southwest
+    [0, -3*Math.PI/4, 0] // Southeast
+  ];
+  
+  return (
+    <group position={position} rotation={rotation}>
+      {/* Table */}
+      <group>
+        {/* Table top */}
+        <Box 
+          args={[tableWidth, 0.1 * scale, tableDepth]} 
+          position={[0, tableHeight, 0]} 
+          castShadow 
+          receiveShadow
+        >
+          <meshPhysicalMaterial 
+            map={tableTexture} 
+            color="#FCFCFC" 
+            metalness={0.1} 
+            roughness={0.2}
+            clearcoat={0.5}
+            clearcoatRoughness={0.15}
+            reflectivity={0.5}
+            envMapIntensity={1.0}
+            onUpdate={(material) => {
+              // Provide fallback if texture is missing
+              if (!material.map) {
+                material.color = new THREE.Color("#FCFCFC");
+              }
+            }}
+          />
+        </Box>
+        
+        {/* Table legs */}
+        {[
+          [-tableWidth/2 + legThickness/2, 0, -tableDepth/2 + legThickness/2],
+          [tableWidth/2 - legThickness/2, 0, -tableDepth/2 + legThickness/2],
+          [tableWidth/2 - legThickness/2, 0, tableDepth/2 - legThickness/2],
+          [-tableWidth/2 + legThickness/2, 0, tableDepth/2 - legThickness/2]
+        ].map((legPos, i) => (
+          <Box
+            key={i}
+            args={[legThickness, tableHeight, legThickness]}
+            position={[legPos[0], tableHeight/2, legPos[2]]}
+            castShadow
+            receiveShadow
+          >
+            <meshPhysicalMaterial 
+              color="#F8F8F8" 
+              metalness={0.1} 
+              roughness={0.3}
+              clearcoat={0.3}
+              reflectivity={0.5}
+            />
+          </Box>
+        ))}
+        
+        {/* Table frame */}
+        <Box 
+          args={[tableWidth, 0.05 * scale, legThickness]} 
+          position={[0, tableHeight - 0.1 * scale, -tableDepth/2 + legThickness/2]} 
+          castShadow
+        >
+          <meshPhysicalMaterial 
+            color="#F8F8F8" 
+            metalness={0.1} 
+            roughness={0.3}
+            clearcoat={0.3}
+            reflectivity={0.5}
+          />
+        </Box>
+        
+        <Box 
+          args={[tableWidth, 0.05 * scale, legThickness]} 
+          position={[0, tableHeight - 0.1 * scale, tableDepth/2 - legThickness/2]} 
+          castShadow
+        >
+          <meshPhysicalMaterial 
+            color="#F8F8F8" 
+            metalness={0.1} 
+            roughness={0.3}
+            clearcoat={0.3}
+            reflectivity={0.5}
+          />
+        </Box>
+        
+        <Box 
+          args={[legThickness, 0.05 * scale, tableDepth]} 
+          position={[-tableWidth/2 + legThickness/2, tableHeight - 0.1 * scale, 0]} 
+          castShadow
+        >
+          <meshPhysicalMaterial 
+            color="#F8F8F8" 
+            metalness={0.1} 
+            roughness={0.3}
+            clearcoat={0.3}
+            reflectivity={0.5}
+          />
+        </Box>
+        
+        <Box 
+          args={[legThickness, 0.05 * scale, tableDepth]} 
+          position={[tableWidth/2 - legThickness/2, tableHeight - 0.1 * scale, 0]} 
+          castShadow
+        >
+          <meshPhysicalMaterial 
+            color="#F8F8F8" 
+            metalness={0.1} 
+            roughness={0.3}
+            clearcoat={0.3}
+            reflectivity={0.5}
+          />
+        </Box>
+      </group>
+      
+      {/* Chairs */}
+      {chairPositions.map((pos, i) => (
+        <Chair 
+          key={i} 
+          position={pos} 
+          rotation={chairRotations[i]} 
+          color={chairColor} 
+        />
+      ))}
+      
+      {/* Decorative item on the table */}
+      <Sphere 
+        args={[0.1 * scale, 32, 32]} 
+        position={[0, tableHeight + 0.15 * scale, 0]}
+      >
+        <meshPhysicalMaterial 
+          color="#E0E0E0" 
+          metalness={0.9} 
+          roughness={0.05}
+          clearcoat={1.0}
+          clearcoatRoughness={0.05}
+          reflectivity={1.0}
+          envMapIntensity={2.0}
+        />
+      </Sphere>
     </group>
   );
 }
@@ -233,6 +598,7 @@ function Painting({ painting, position, rotationY }) {
 function MuseumEnvironment() {
   const floorMaterial = useRef();
   const wallMaterial = useRef();
+  const floorTexture = useTexture('/images/textures/8.jpg');
   
   const wallHeight = 6;
   const galleryWidth = 22;
@@ -240,10 +606,37 @@ function MuseumEnvironment() {
   
   // Create basic materials with better properties
   useEffect(() => {
-    if (floorMaterial.current) {
-      floorMaterial.current.color = new THREE.Color("#513D2C");
-      floorMaterial.current.metalness = 0.1;
-      floorMaterial.current.roughness = 0.8;
+    if (floorMaterial.current && floorTexture) {
+      try {
+        floorMaterial.current.map = floorTexture;
+        floorMaterial.current.map.wrapS = THREE.RepeatWrapping;
+        floorMaterial.current.map.wrapT = THREE.RepeatWrapping;
+        floorMaterial.current.map.repeat.set(12, 12); // More repeats for more detailed marble
+        floorMaterial.current.needsUpdate = true;
+        
+        // Crystal quartz marble-like properties
+        floorMaterial.current.metalness = 0.6; // High metalness for crystal-like shine
+        floorMaterial.current.roughness = 0.2; // Very low roughness for polished look
+        floorMaterial.current.envMapIntensity = 1.5; // Enhance reflections
+        floorMaterial.current.clearcoat = 0.8; // Add clearcoat for polished marble look
+        floorMaterial.current.clearcoatRoughness = 0.1; // Make the clearcoat slightly rough for realism
+        
+        // Add a subtle blue/white tint to simulate crystal quartz
+        floorMaterial.current.color = new THREE.Color("#E8EEFF");
+      } catch (err) {
+        console.error('Error applying texture:', err);
+        // Fallback to solid color if texture fails
+        if (floorMaterial.current) {
+          floorMaterial.current.color = new THREE.Color("#E8EEFF");
+          floorMaterial.current.metalness = 0.6;
+          floorMaterial.current.roughness = 0.2;
+        }
+      }
+    } else if (floorMaterial.current) {
+      // Fallback if texture didn't load
+      floorMaterial.current.color = new THREE.Color("#E8EEFF");
+      floorMaterial.current.metalness = 0.6;
+      floorMaterial.current.roughness = 0.2;
     }
     
     if (wallMaterial.current) {
@@ -251,10 +644,13 @@ function MuseumEnvironment() {
       wallMaterial.current.metalness = 0.1;
       wallMaterial.current.roughness = 0.9;
     }
-  }, []);
+  }, [floorTexture]);
 
   return (
     <group>
+      {/* Environment for reflections */}
+      <Environment preset="city" />
+      
       {/* Floor */}
       <Plane 
         args={[galleryWidth, galleryDepth]} 
@@ -262,7 +658,7 @@ function MuseumEnvironment() {
         position={[0, 0, 0]} 
         receiveShadow
       >
-        <meshStandardMaterial ref={floorMaterial} color="#513D2C" />
+        <meshPhysicalMaterial ref={floorMaterial} color="#FFFFFF" />
       </Plane>
       
       {/* Walls */}
@@ -314,6 +710,17 @@ function MuseumEnvironment() {
         <meshStandardMaterial color="#E8E8E8" side={THREE.DoubleSide} />
       </Plane>
       
+      {/* Signature on the back wall */}
+      <SignatureImage />
+      
+      {/* Add only one dining set to the museum (removed the center one) */}
+      <DiningSet 
+        position={[8, 0, -11]} 
+        rotation={[0, Math.PI / 6, 0]} 
+        scale={1} 
+        chairColor="#F5F5F5"
+      />
+      
       {/* Ambient Light Fixtures */}
       {[-galleryWidth/4, galleryWidth/4].map((x, i) => (
         <group key={i} position={[x, wallHeight - 0.1, 0]}>
@@ -328,6 +735,25 @@ function MuseumEnvironment() {
             color="#FFFAF0" 
           />
         </group>
+      ))}
+      
+      {/* Floor Spotlights for crystal effect */}
+      {[
+        [-galleryWidth/3, 0], [0, 0], [galleryWidth/3, 0],
+        [-galleryWidth/4, galleryDepth/3], [galleryWidth/4, galleryDepth/3],
+        [-galleryWidth/4, -galleryDepth/3], [galleryWidth/4, -galleryDepth/3]
+      ].map((pos, i) => (
+        <SpotLight
+          key={i}
+          position={[pos[0], wallHeight - 0.5, pos[1]]}
+          angle={0.5}
+          distance={wallHeight * 2}
+          intensity={0.8}
+          penumbra={0.8}
+          color="#FFFFFF"
+          castShadow={false}
+          target-position={[pos[0], 0, pos[1]]}
+        />
       ))}
     </group>
   );
@@ -402,8 +828,8 @@ function Player() {
     velocity.current.z -= velocity.current.z * 10.0 * delta;
     
     // Move player
-    controls.current.moveRight(-velocity.current.x);
-    controls.current.moveForward(-velocity.current.z);
+    controls.current.moveRight(velocity.current.x);
+    controls.current.moveForward(velocity.current.z);
 
     // Collision detection
     const playerPos = controls.current.getObject().position;
@@ -462,6 +888,93 @@ function SoundManager() {
   return null;
 }
 
+// Paint Drop component for click effects
+function PaintDrop({ position, color, lifespan = 8000 }) {
+  const [opacity, setOpacity] = useState(1);
+  const [scale, setScale] = useState(0.8);
+  
+  useEffect(() => {
+    // Gradually decrease opacity and increase scale
+    const opacityInterval = setInterval(() => {
+      setOpacity(prev => Math.max(0, prev - 0.01));
+      setScale(prev => Math.min(prev + 0.02, 1.5));
+    }, 100);
+    
+    // Remove after lifespan
+    const cleanup = setTimeout(() => {
+      clearInterval(opacityInterval);
+    }, lifespan);
+    
+    return () => {
+      clearInterval(opacityInterval);
+      clearTimeout(cleanup);
+    };
+  }, [lifespan]);
+  
+  // Don't render if fully transparent
+  if (opacity <= 0) return null;
+  
+  const dropStyle = {
+    position: 'absolute',
+    left: position.x + 'px',
+    top: position.y + 'px',
+    width: '12px',
+    height: '12px',
+    borderRadius: '50%',
+    backgroundColor: color,
+    opacity: opacity,
+    transform: `translate(-50%, -50%) scale(${scale})`,
+    transition: 'transform 0.5s ease-out',
+    pointerEvents: 'none',
+    zIndex: 1000
+  };
+  
+  return <div style={dropStyle} />;
+}
+
+// Paint Manager Component
+function PaintManager() {
+  const [drops, setDrops] = useState([]);
+  
+  // Handle mouse clicks to create paint drops
+  useEffect(() => {
+    const colors = ['#e63946', '#2a9d8f', '#e9c46a', '#264653', '#f4a261'];
+    
+    const handleClick = (e) => {
+      // Only add drops in the canvas area
+      if (e.target.id === 'canvas-container' || e.target.closest('#canvas-container')) {
+        const newDrop = {
+          id: Date.now(),
+          position: { x: e.clientX, y: e.clientY },
+          color: colors[Math.floor(Math.random() * colors.length)]
+        };
+        
+        setDrops(prev => [...prev, newDrop]);
+        
+        // Remove drop after lifespan to avoid memory issues
+        setTimeout(() => {
+          setDrops(prev => prev.filter(drop => drop.id !== newDrop.id));
+        }, 8000);
+      }
+    };
+    
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
+  
+  return (
+    <div className="paint-drops">
+      {drops.map(drop => (
+        <PaintDrop 
+          key={drop.id} 
+          position={drop.position} 
+          color={drop.color} 
+        />
+      ))}
+    </div>
+  );
+}
+
 // --- Main Museum Component ---
 const InteractiveMuseum = () => {
   const [isLocked, setIsLocked] = useState(false);
@@ -489,10 +1002,14 @@ const InteractiveMuseum = () => {
     const handleLock = () => setIsLocked(true);
     const handleUnlock = () => setIsLocked(false);
     
-    // Show performance stats with 'P' key
+    // Update key handlers
     const handleKeyDown = (e) => {
       if (e.code === 'KeyP') setShowStats(prev => !prev);
-      if (e.code === 'KeyH') setShowHelp(prev => !prev);
+      // Change H key to navigate home
+      if (e.code === 'KeyH') {
+        // Navigate to home page
+        window.location.href = '/';
+      }
       if (e.code === 'KeyF') toggleFullscreen();
     };
     
@@ -639,8 +1156,11 @@ const InteractiveMuseum = () => {
     <div 
       id="canvas-container" 
       ref={containerRef}
-      className={`relative w-full h-screen ${getBgClass()} cursor-crosshair overflow-hidden`}
+      className={`relative w-full h-screen ${getBgClass()} overflow-hidden rounded-xl`}
     >
+      {/* Paint drop effects layer */}
+      <PaintManager />
+      
       {/* Performance Stats (Toggle with 'P' key) */}
       {showStats && <Stats className="absolute top-0 left-0" />}
       
@@ -702,7 +1222,7 @@ const InteractiveMuseum = () => {
             <li>Shift - Sprint</li>
             <li>ESC - Release mouse</li>
             <li>P - Toggle FPS stats</li>
-            <li>H - Toggle this help</li>
+            <li>H - Exit to home page</li>
             <li>F - Toggle fullscreen</li>
             <li>Click paintings - View details</li>
           </ul>
@@ -749,7 +1269,7 @@ const InteractiveMuseum = () => {
                 </li>
                 <li className="flex items-center gap-2">
                   <span className={`${darkMode ? 'bg-gray-700' : 'bg-gray-300'} px-2 py-1 rounded`}>H</span> 
-                  <span>Help menu</span>
+                  <span>Exit to home</span>
                 </li>
               </ul>
             </div>

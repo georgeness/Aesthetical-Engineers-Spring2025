@@ -1,11 +1,58 @@
-
-
 /* I removed Google Fonts import – now using next/font in layout.jsx instead */
 
 /* Tailwind Directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom Cursor Styles */
+:root {
+  cursor: url('/images/cursors/small-paintbrush.png') 0 0, auto !important;
+}
+
+html, body, div, span, a, p, h1, h2, h3, h4, h5, h6, button, input, textarea, select, canvas {
+  cursor: url('/images/cursors/small-paintbrush.png') 0 0, auto !important;
+}
+
+button, a, [role="button"], input[type="submit"], input[type="button"],
+.cursor-pointer, *[onclick], *[class*="hover"], select, option, label, input[type="checkbox"], input[type="radio"] {
+  cursor: url('/images/cursors/small-paintbrush.png') 0 0, pointer !important;
+}
+
+/* Override cursor for disabled elements */
+button:disabled, input:disabled, select:disabled, textarea:disabled,
+[disabled], .disabled, .cursor-not-allowed {
+  cursor: url('/images/cursors/small-paintbrush.png') 0 0, not-allowed !important;
+  opacity: 0.6;
+}
+
+/* Paint Drop Effect */
+.paint-drop {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  opacity: 1;
+  z-index: 9999;
+  transition: opacity 0.8s linear, transform 0.5s ease-out;
+  filter: blur(0.3px);
+}
+
+/* More vibrant, artist-style colors */
+.paint-drop.red { 
+  background-color: #e63946; 
+  box-shadow: 0 0 3px rgba(230, 57, 70, 0.6);
+}
+.paint-drop.blue { 
+  background-color: #1d3557; 
+  box-shadow: 0 0 3px rgba(29, 53, 87, 0.6);
+}
+.paint-drop.yellow { 
+  background-color: #f4a261; 
+  box-shadow: 0 0 3px rgba(244, 162, 97, 0.6);
+}
 
 /* Gradient Grid Background inspired by https://dub.sh */
 .main {
