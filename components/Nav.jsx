@@ -1,11 +1,52 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 const Nav = () => {
   // State for toggling the mobile menu
   const [isOpen, setIsOpen] = useState(false);
+  // State to track login status and username
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('George');
+  
+  // Check login status on component mount and when storage changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const checkLoginStatus = () => {
+        const loginStatus = localStorage.getItem('loggedIn') === 'true';
+        setIsLoggedIn(loginStatus);
+        
+        // Get stored username if available
+        if (loginStatus) {
+          const storedUsername = localStorage.getItem('username');
+          if (storedUsername) {
+            setUsername(storedUsername);
+          }
+        }
+      };
+      
+      // Check initially
+      checkLoginStatus();
+      
+      // Listen for storage events (in case of logout in another tab)
+      window.addEventListener('storage', checkLoginStatus);
+      
+      // Custom event for login/logout updates
+      window.addEventListener('auth-change', checkLoginStatus);
+      
+      return () => {
+        window.removeEventListener('storage', checkLoginStatus);
+        window.removeEventListener('auth-change', checkLoginStatus);
+      };
+    }
+  }, []);
+
+  // Format username for display (capitalize first letter)
+  const formatUsername = (name) => {
+    if (!name) return 'George';
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  };
 
   return (
     <>
@@ -44,12 +85,21 @@ const Nav = () => {
         >
           Contact
         </Link>
-        <Link 
-          href="/login" 
-          className="flex gap-2 flex-center px-4 py-2 bg-orange-500 text-white rounded-full transition-all duration-300 hover:bg-orange-600 hover:shadow-md hover:scale-105"
-        >
-          Login
-        </Link>
+        {isLoggedIn ? (
+          <Link 
+            href="/dashboard" 
+            className="flex gap-2 flex-center px-4 py-2 bg-orange-500 text-white rounded-full transition-all duration-300 hover:bg-orange-600 hover:shadow-md hover:scale-105"
+          >
+            Welcome, {formatUsername(username)}!
+          </Link>
+        ) : (
+          <Link 
+            href="/login" 
+            className="flex gap-2 flex-center px-4 py-2 bg-orange-500 text-white rounded-full transition-all duration-300 hover:bg-orange-600 hover:shadow-md hover:scale-105"
+          >
+            Login
+          </Link>
+        )}
       </nav>
 
       {/* -- Mobile Nav (shown only if width < md) -- */}
@@ -113,12 +163,21 @@ const Nav = () => {
             >
               Contact
             </Link>
-            <Link 
-              href="/login" 
-              className="flex gap-2 flex-center mt-2 p-2 bg-orange-500 text-white rounded-md text-center justify-center transition-all duration-300 hover:bg-orange-600"
-            >
-              Login
-            </Link>
+            {isLoggedIn ? (
+              <Link 
+                href="/dashboard" 
+                className="flex gap-2 flex-center mt-2 p-2 bg-orange-500 text-white rounded-md text-center justify-center transition-all duration-300 hover:bg-orange-600"
+              >
+                Welcome, {formatUsername(username)}!
+              </Link>
+            ) : (
+              <Link 
+                href="/login" 
+                className="flex gap-2 flex-center mt-2 p-2 bg-orange-500 text-white rounded-md text-center justify-center transition-all duration-300 hover:bg-orange-600"
+              >
+                Login
+              </Link>
+            )}
           </div>
         )}
       </nav>

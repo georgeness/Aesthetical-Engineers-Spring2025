@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed-user": "node -r dotenv/config utils/seed-user.js",
+    "debug-users": "node -r dotenv/config utils/debug-users.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -14,6 +16,7 @@
     "@react-three/fiber": "^8.15.10",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
+    "dotenv": "^16.5.0",
     "framer-motion": "^12.6.5",
     "gsap": "^3.12.7",
     "html2canvas": "^1.4.1",
@@ -31,6 +34,7 @@
     "sharp": "^0.34.1",
     "three": "^0.175.0",
     "tone": "^15.0.4",
+    "uuid": "^9.0.1",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

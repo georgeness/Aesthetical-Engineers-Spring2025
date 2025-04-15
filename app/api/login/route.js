@@ -1,46 +1,85 @@
+import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import User from '../../../modules/user';
 import { connectToDB } from '../../../utils/database';
 
-export const POST = async (req) => {
-  const { username, password } = await req.json();
-
+export async function POST(req) {
   try {
-    // Connect to the database
+    const { username, password } = await req.json();
+    
+    console.log('Login attempt for username:', username);
+    
+    if (!username || !password) {
+      console.log('Missing username or password');
+      return NextResponse.json(
+        { message: 'Username and password are required' },
+        { status: 400 }
+      );
+    }
+    
     await connectToDB();
-
-    // Find user in the database - using case-insensitive query
-    const user = await User.findOne({ 
-      username: { $regex: new RegExp(`^${username}$`, 'i') } 
-    });
-
+    
+    // Try finding user with exact match first
+    let user = await User.findOne({ username });
+    
+    // If not found, try case-insensitive match
     if (!user) {
-      return new Response(
-        JSON.stringify({ message: 'Invalid username' }),
+      user = await User.findOne({
+        username: { $regex: new RegExp(`^${username}$`, 'i') }
+      });
+    }
+    
+    // Try matching "GeorgeJr" specifically if still not found
+    if (!user && (username.toLowerCase() === 'georgejr' || username.toLowerCase() === 'george jr')) {
+      user = await User.findOne({
+        username: "GeorgeJr"
+      });
+    }
+    
+    console.log('User found:', user ? 'Yes' : 'No');
+    
+    if (!user) {
+      return NextResponse.json(
+        { message: 'Invalid username' },
         { status: 401 }
       );
     }
-
-    // Compare hashed password
+    
+    // Check if password is correct
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
-
+    
+    console.log('Password match:', isPasswordCorrect ? 'Yes' : 'No');
+    
     if (!isPasswordCorrect) {
-      return new Response(
-        JSON.stringify({ message: 'Invalid password' }),
+      return NextResponse.json(
+        { message: 'Invalid password' },
         { status: 401 }
       );
     }
-
-    // Return a success message if the login is successful
-    return new Response(
-      JSON.stringify({ message: 'Login successful' }),
+    
+    // Set a cookie to maintain login state
+    const response = NextResponse.json(
+      { message: 'Login successful', username: user.username },
       { status: 200 }
     );
+    
+    // Set a secure HTTP-only cookie
+    response.cookies.set({
+      name: 'loggedIn',
+      value: 'true',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/'
+    });
+    
+    return response;
   } catch (error) {
-    console.error(error);
-    return new Response(
-      JSON.stringify({ message: 'Server error, please try again later' }),
+    console.error('Login error:', error);
+    return NextResponse.json(
+      { message: 'An error occurred during login' },
       { status: 500 }
     );
   }
-};
+}

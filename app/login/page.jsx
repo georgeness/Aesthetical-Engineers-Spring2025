@@ -16,23 +16,45 @@ const Login = () => {
     setError('');
     setSuccess('');
 
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }), // Sending 'username' instead of 'email'
-    });
+    // Normalize username to avoid case-sensitivity issues
+    const normalizedUsername = username.trim();
+    
+    console.log('Attempting login with username:', normalizedUsername);
 
-    const data = await response.json();
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: normalizedUsername, password }),
+      });
 
-    if (response.ok) {
-      localStorage.setItem('loggedIn', 'true'); // set login flag
-      setSuccess('Login successful! Redirecting...');
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 1500);
-    } else {
-      // Show error message if login fails
-      setError(data.message || 'Invalid username or password');
+      const data = await response.json();
+      console.log('Login response status:', response.status);
+
+      if (response.ok) {
+        console.log('Login successful, setting localStorage');
+        
+        // Set login state in localStorage
+        localStorage.setItem('loggedIn', 'true');
+        
+        // Store the username for personalized welcome message (optional)
+        localStorage.setItem('username', data.username || 'George');
+        
+        // Dispatch a custom event to notify other components of login status change
+        window.dispatchEvent(new Event('auth-change'));
+        
+        setSuccess('Login successful! Redirecting...');
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 1500);
+      } else {
+        // Show error message if login fails
+        console.log('Login failed:', data.message);
+        setError(data.message || 'Invalid username or password');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('An error occurred during login. Please try again.');
     }
   };
 
