@@ -25,11 +25,11 @@ const Login = () => {
     const data = await response.json();
 
     if (response.ok) {
-      // Successful login
+      localStorage.setItem('loggedIn', 'true'); // set login flag
       setSuccess('Login successful! Redirecting...');
       setTimeout(() => {
-        router.push('/');
-      }, 1500); // Redirect after 1.5 seconds to show success message
+        router.push('/dashboard');
+      }, 1500);
     } else {
       // Show error message if login fails
       setError(data.message || 'Invalid username or password');
