@@ -6,41 +6,75 @@ const MessageWidget = () => {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const toggleWidget = () => {
     setIsOpen(!isOpen);
+    // Reset form and error states when toggling
+    setError("");
+    if (!isOpen) {
+      setSubmitted(false); 
+    }
   };
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    
+    // Form validation
+    if (!formData.name.trim()) {
+      setError("Please enter your name");
+      return;
+    }
+    
+    if (!validateEmail(formData.email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+    
+    if (!formData.message.trim()) {
+      setError("Please enter your message");
+      return;
+    }
+    
     setIsSubmitting(true);
-    // Sends message to george.lupo.app@gmail.com via your API endpoint.
+    
     try {
       const response = await fetch("/api/send-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
+      
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Something went wrong");
+        throw new Error(data.error || "Failed to send message");
       }
+      
       setSubmitted(true);
       setFormData({ name: "", email: "", message: "" });
+      
+      // Close the widget after 3 seconds
       setTimeout(() => {
         setSubmitted(false);
         setIsOpen(false);
-      }, 2000);
+      }, 3000);
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("There was an error sending your message. Please try again.");
+      setError(error.message || "Failed to send message. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
   return (
@@ -68,12 +102,19 @@ const MessageWidget = () => {
             </button>
           </div>
           <p className="text-sm text-gray-600 mb-4">
-            Hi! Let us know how we can help and we’ll respond shortly.
+            Hi! Let us know how we can help and we'll respond shortly.
           </p>
           {submitted ? (
-            <div className="text-green-600 text-center font-medium">Message sent!</div>
+            <div className="text-green-600 text-center font-medium p-4 bg-green-50 rounded-lg">
+              Message sent successfully! We'll get back to you soon.
+            </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="text-red-500 text-sm bg-red-50 p-2 rounded-lg">
+                  {error}
+                </div>
+              )}
               <input
                 type="text"
                 name="name"
@@ -82,6 +123,7 @@ const MessageWidget = () => {
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200"
                 required
+                disabled={isSubmitting}
               />
               <input
                 type="email"
@@ -91,6 +133,7 @@ const MessageWidget = () => {
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200"
                 required
+                disabled={isSubmitting}
               />
               <textarea
                 name="message"
@@ -100,11 +143,16 @@ const MessageWidget = () => {
                 className="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 resize-none"
                 rows={3}
                 required
+                disabled={isSubmitting}
               />
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full px-4 py-2 text-sm hover:from-blue-600 hover:to-blue-800 transition-colors"
+                className={`w-full text-white rounded-full px-4 py-2 text-sm transition-colors ${
+                  isSubmitting 
+                    ? "bg-gray-400" 
+                    : "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
+                }`}
               >
                 {isSubmitting ? "Sending..." : "Send Message"}
               </button>
