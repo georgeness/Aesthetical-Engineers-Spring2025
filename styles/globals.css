@@ -11,18 +11,17 @@
 }
 
 html, body, div, span, a, p, h1, h2, h3, h4, h5, h6, button, input, textarea, select, canvas {
-  cursor: url('/images/cursors/small-paintbrush.png') 0 0, auto !important;
+  cursor: auto;
 }
 
 button, a, [role="button"], input[type="submit"], input[type="button"],
-.cursor-pointer, *[onclick], *[class*="hover"], select, option, label, input[type="checkbox"], input[type="radio"] {
-  cursor: url('/images/cursors/small-paintbrush.png') 0 0, pointer !important;
+[type="reset"], [type="checkbox"], [type="radio"], a {
+  cursor: pointer;
 }
 
-/* Override cursor for disabled elements */
 button:disabled, input:disabled, select:disabled, textarea:disabled,
-[disabled], .disabled, .cursor-not-allowed {
-  cursor: url('/images/cursors/small-paintbrush.png') 0 0, not-allowed !important;
+[aria-disabled="true"] {
+  cursor: not-allowed;
   opacity: 0.6;
 }
 
