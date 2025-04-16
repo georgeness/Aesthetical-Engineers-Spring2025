@@ -8,12 +8,16 @@ export async function POST(request) {
     // Check if user is logged in
     const isLoggedIn = request.cookies.get('loggedIn')?.value === 'true';
     
+    console.log("Login status:", isLoggedIn); // Log auth status
+    
     if (!isLoggedIn) {
       return NextResponse.json({ error: "Not authorized" }, { status: 401 });
     }
     
     const formData = await request.formData();
     const file = formData.get("file");
+    
+    console.log("File received:", file?.name, file?.type, file?.size); // Log file info
     
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -39,19 +43,32 @@ export async function POST(request) {
     const fileExtension = file.name.split('.').pop();
     const fileName = `${uuidv4()}.${fileExtension}`;
 
-    // Upload to Vercel Blob Storage
-    const blob = await put(fileName, file, {
-      access: 'public',
-    });
+    console.log("Attempting to upload to Blob Storage:", fileName); // Log upload attempt
     
-    // Return the image URL
-    return NextResponse.json({ 
-      url: blob.url,
-      message: "File uploaded successfully" 
-    }, { status: 200 });
+    try {
+      // Upload to Vercel Blob Storage
+      const blob = await put(fileName, file, {
+        access: 'public',
+      });
+      
+      console.log("Upload successful, blob URL:", blob.url); // Log success
+      
+      // Return the image URL
+      return NextResponse.json({ 
+        url: blob.url,
+        message: "File uploaded successfully" 
+      }, { status: 200 });
+    } catch (blobError) {
+      console.error("Blob storage error details:", blobError); // Log detailed blob error
+      return NextResponse.json({ 
+        error: `Blob storage error: ${blobError.message}` 
+      }, { status: 500 });
+    }
     
   } catch (error) {
     console.error("Error uploading file:", error);
-    return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
+    return NextResponse.json({ 
+      error: `Failed to upload file: ${error.message}` 
+    }, { status: 500 });
   }
 } 
