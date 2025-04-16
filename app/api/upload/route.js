@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
 
 // POST - Handle image upload
@@ -39,20 +38,15 @@ export async function POST(request) {
     // Create a unique filename
     const fileExtension = file.name.split('.').pop();
     const fileName = `${uuidv4()}.${fileExtension}`;
-    
-    // Define the upload path
-    const uploadDir = path.join(process.cwd(), "public/images");
-    const filePath = path.join(uploadDir, fileName);
-    
-    // Read the file as a buffer
-    const buffer = Buffer.from(await file.arrayBuffer());
-    
-    // Write the file to the server
-    await writeFile(filePath, buffer);
+
+    // Upload to Vercel Blob Storage
+    const blob = await put(fileName, file, {
+      access: 'public',
+    });
     
     // Return the image URL
     return NextResponse.json({ 
-      url: `/images/${fileName}`,
+      url: blob.url,
       message: "File uploaded successfully" 
     }, { status: 200 });
     
