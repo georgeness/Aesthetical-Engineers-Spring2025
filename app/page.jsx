@@ -25,63 +25,63 @@ const HomePage = () => {
   return (
     <main className="w-full flex flex-col items-center justify-center p-6">
       {/* Welcome Section */}
-      <section className="w-full flex flex-col items-center text-center">
-      <h1
-  className="
-    relative
-    -top-2
-    font-bold
-    transition-opacity
-    duration-700
-    opacity-90
-    text-4xl
-    sm:text-5xl
-    md:text-6xl
-    lg:text-7xl
-    leading-snug
-    max-w-xs
-    sm:max-w-lg
-    md:max-w-2xl
-    mx-auto
-    break-words
-  "
->
-  Welcome
-  <br className="hidden sm:block" />
-  <span
-  className="
-    relative
-    top-2
-    bg-gradient-to-r
-    from-orange-500
-    to-yellow-400
-    bg-clip-text
-    text-transparent
-    font-extrabold
-    text-5xl
-    sm:text-6xl
-    md:text-7xl
-    lg:text-8xl
-    leading-none
-    break-words
-    block
-    align-baseline
-  "
->
-  Paintings
-</span>
-
-
-</h1>
-
+      <section className="w-full flex flex-col items-center text-center relative z-40">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl px-6 py-4 mb-8 z-50 relative">
+          <h1
+            className="
+              font-bold
+              transition-opacity
+              duration-700
+              opacity-90
+              text-4xl
+              sm:text-5xl
+              md:text-6xl
+              lg:text-7xl
+              leading-snug
+              max-w-xs
+              sm:max-w-lg
+              md:max-w-2xl
+              mx-auto
+              break-words
+              z-50
+              drop-shadow-sm
+            "
+          >
+            Welcome
+            <br className="hidden sm:block" />
+            <span
+              className="
+                bg-gradient-to-r
+                from-orange-500
+                to-yellow-400
+                bg-clip-text
+                text-transparent
+                font-extrabold
+                text-5xl
+                sm:text-6xl
+                md:text-7xl
+                lg:text-8xl
+                leading-relaxed
+                break-words
+                block
+                align-baseline
+                z-50
+                drop-shadow
+                mb-2
+              "
+            >
+              Paintings
+            </span>
+          </h1>
+        </div>
 
         {/* Image Carousel */}
-        <div className="w-full max-w-4xl mt-6 animate-fadeIn px-2 sm:px-6">
+        <div className="w-full max-w-4xl mt-4 animate-fadeIn px-2 sm:px-6 relative z-30">
           <ImageCarousel imageUrls={CAROUSEL} />
         </div>
 
         {/* Buttons */}
-        <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-4 mt-6">
+        <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-4 mt-6 relative z-40">
           <Link href="/about">
             <button
               className="
