@@ -1,10 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  basePath: process.env.NODE_ENV === 'production' ? '/Aesthetical-Engineers-Spring2025' : '',
-  images: {
-    unoptimized: true,
-  },
+  // Only use static export for production builds on GitHub Pages
+  ...(process.env.GITHUB_ACTIONS && {
+    output: 'export',
+    basePath: '/Aesthetical-Engineers-Spring2025',
+    images: {
+      unoptimized: true,
+    },
+  }),
 };
 
 export default nextConfig;
