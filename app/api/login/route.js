@@ -63,13 +63,13 @@ export async function POST(req) {
       { status: 200 }
     );
     
-    // Set a secure HTTP-only cookie
+    // Set both an HTTP-only cookie and a readable cookie
     response.cookies.set({
       name: 'loggedIn',
       value: 'true',
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/'
     });

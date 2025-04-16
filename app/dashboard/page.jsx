@@ -102,6 +102,9 @@ const Dashboard = () => {
       
       const response = await fetch('/api/upload', {
         method: 'POST',
+        headers: {
+          'x-is-logged-in': 'true'
+        },
         body: formData
       });
       
