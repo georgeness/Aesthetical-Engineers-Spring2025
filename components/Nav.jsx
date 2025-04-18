@@ -52,7 +52,7 @@ const Nav = () => {
     <>
       {/* -- Desktop Nav */}
       <nav className="hidden md:flex flex-between w-full mb-16 pt-7 px-4">
-        <Link href="/" className="flex gap-2 flex-center">
+        <Link href="/" className="flex gap-2 flex-center mr-auto">
           <Image
             src="/images/other/signature.png"
             alt="signature"
@@ -61,45 +61,47 @@ const Nav = () => {
             className="object-fit"
           />
         </Link>
-        <Link 
-          href="/" 
-          className="flex gap-2 flex-center relative px-2 py-1 font-medium transition-all duration-300 hover:text-orange-500 hover:scale-105 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-orange-500 after:transition-all after:duration-300 hover:after:w-full"
-        >
-          Home
-        </Link>
-        <Link 
-          href="/collection" 
-          className="flex gap-2 flex-center relative px-2 py-1 font-medium transition-all duration-300 hover:text-orange-500 hover:scale-105 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-orange-500 after:transition-all after:duration-300 hover:after:w-full"
-        >
-          Collection
-        </Link>
-        <Link 
-          href="/exhibitions" 
-          className="flex gap-2 flex-center relative px-2 py-1 font-medium transition-all duration-300 hover:text-orange-500 hover:scale-105 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-orange-500 after:transition-all after:duration-300 hover:after:w-full"
-        >
-          Awards & Exhibitions
-        </Link>
-        <Link 
-          href="/contact" 
-          className="flex gap-2 flex-center relative px-2 py-1 font-medium transition-all duration-300 hover:text-orange-500 hover:scale-105 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-orange-500 after:transition-all after:duration-300 hover:after:w-full"
-        >
-          Contact
-        </Link>
-        {isLoggedIn ? (
+        <div className="flex items-center space-x-8">
           <Link 
-            href="/dashboard" 
-            className="flex gap-2 flex-center px-4 py-2 bg-orange-500 text-white rounded-full transition-all duration-300 hover:bg-orange-600 hover:shadow-md hover:scale-105"
+            href="/" 
+            className="flex gap-2 flex-center relative px-2 py-1 font-medium transition-all duration-300 hover:text-orange-500 hover:scale-105 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-orange-500 after:transition-all after:duration-300 hover:after:w-full"
           >
-            Welcome, {formatUsername(username)}!
+            Home
           </Link>
-        ) : (
           <Link 
-            href="/login" 
-            className="flex gap-2 flex-center px-4 py-2 bg-orange-500 text-white rounded-full transition-all duration-300 hover:bg-orange-600 hover:shadow-md hover:scale-105"
+            href="/collection" 
+            className="flex gap-2 flex-center relative px-2 py-1 font-medium transition-all duration-300 hover:text-orange-500 hover:scale-105 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-orange-500 after:transition-all after:duration-300 hover:after:w-full"
           >
-            Login
+            Collection
           </Link>
-        )}
+          <Link 
+            href="/exhibitions" 
+            className="flex gap-2 flex-center relative px-2 py-1 font-medium transition-all duration-300 hover:text-orange-500 hover:scale-105 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-orange-500 after:transition-all after:duration-300 hover:after:w-full"
+          >
+            Awards & Exhibitions
+          </Link>
+          <Link 
+            href="/contact" 
+            className="flex gap-2 flex-center relative px-2 py-1 font-medium transition-all duration-300 hover:text-orange-500 hover:scale-105 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-orange-500 after:transition-all after:duration-300 hover:after:w-full"
+          >
+            Contact
+          </Link>
+          {isLoggedIn ? (
+            <Link 
+              href="/dashboard" 
+              className="flex gap-2 flex-center px-4 py-2 bg-orange-500 text-white rounded-full transition-all duration-300 hover:bg-orange-600 hover:shadow-md hover:scale-105 ml-4"
+            >
+              Welcome, {formatUsername(username)}!
+            </Link>
+          ) : (
+            <Link 
+              href="/login" 
+              className="flex gap-2 flex-center px-4 py-2 bg-orange-500 text-white rounded-full transition-all duration-300 hover:bg-orange-600 hover:shadow-md hover:scale-105 ml-4"
+            >
+              Login
+            </Link>
+          )}
+        </div>
       </nav>
 
       {/* -- Mobile Nav (shown only if width < md) -- */}

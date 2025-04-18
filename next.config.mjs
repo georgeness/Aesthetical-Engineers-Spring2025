@@ -1,13 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-      remotePatterns: [
-        {
-          protocol: 'https',
-          hostname: 'bhvqdgbwuom91t7g.public.blob.vercel-storage.com',
-          pathname: '**',
-        },
-      ],
+      domains: ['bhvqdgbwuom91t7g.public.blob.vercel-storage.com'],
     },
     // Only use static export for production builds on GitHub Pages
     ...(process.env.GITHUB_ACTIONS && {

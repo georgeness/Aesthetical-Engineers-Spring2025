@@ -1,18 +1,19 @@
 "use client";
 import React from "react";
+import Link from "next/link";
 
 const About = () => (
   <section className="w-full flex flex-col items-center px-4 py-8 sm:p-10 bg-gray-50">
     <div className="max-w-4xl w-full">
       {/* Responsive heading: smaller on mobile, larger on wider screens */}
       <h1 className="head_text text-center mb-8 text-3xl sm:text-5xl font-extrabold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
-        About Me
+        The Artist Behind The Canvas
       </h1>
 
       {/* About content container */}
       <article className="max-w-3xl mx-auto text-base sm:text-lg leading-relaxed text-gray-700 p-6 bg-white rounded-xl shadow-lg">
         <h2 className="text-lg sm:text-xl font-bold mb-4">
-          My Background and My Recent Work
+          My Artistic Journey
         </h2>
         <p className="mb-4">
           At this point, there is no sole reason why I make art. I do it for the enjoyment of
@@ -44,7 +45,7 @@ const About = () => (
         </p>
         <p className="mb-4">
           While painting, I mostly concern myself with color balance – and how I move the
-          viewer’s eye on the canvas. Color value is another element that I concern myself
+          viewer's eye on the canvas. Color value is another element that I concern myself
           with as I paint.
         </p>
         <p className="mb-4">
@@ -56,6 +57,24 @@ const About = () => (
           My work is purposely void of representationalism, story or poetry. There is the
           space, the color and the paint.
         </p>
+        
+        {/* Social Media Links */}
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <h3 className="text-lg font-semibold mb-3">Connect With Me</h3>
+          <div className="flex items-center">
+            <Link 
+              href="https://www.facebook.com/profile.php?id=100052005893530"
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9.19795 21.5H13.198V13.4901H16.8021L17.198 9.50977H13.198V7.5C13.198 6.94772 13.6457 6.5 14.198 6.5H17.198V2.5H14.198C11.4365 2.5 9.19795 4.73858 9.19795 7.5V9.50977H7.19795L6.80206 13.4901H9.19795V21.5Z" />
+              </svg>
+              Visit my Facebook page
+            </Link>
+          </div>
+        </div>
       </article>
     </div>
   </section>
