@@ -956,81 +956,81 @@ const PaintingLibrary = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-75 z-50 px-4"
-              onClick={closeModal}
+            className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-75 z-50 px-2 py-2 sm:px-4 sm:py-4 overflow-y-auto"
+            onClick={closeModal}
           >
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className={`relative ${theme.modal} p-6 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden`}
+              className={`relative ${theme.modal} p-4 sm:p-6 rounded-2xl shadow-2xl w-full sm:max-w-5xl sm:w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto`}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
               <button
                 onClick={closeModal}
-                className={`absolute top-4 right-4 z-30 p-2 rounded-full ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'} hover:bg-opacity-80`}
+                className={`absolute top-2 right-2 sm:top-4 sm:right-4 z-30 p-2 rounded-full ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'} hover:bg-opacity-80`}
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
 
-              <div className="flex flex-col md:flex-row gap-6 h-full">
+              <div className="flex flex-col md:flex-row gap-4 sm:gap-6">
                 {/* Image with zoom controls or AR View */}
                 <div className="relative w-full md:w-2/3 overflow-hidden">
                   {!isARMode ? (
                     <>
                       {/* Zoom controls */}
-                      <div className="absolute top-4 left-4 z-20 flex space-x-2">
+                      <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-20 flex space-x-2">
                         <button
                           onClick={() => handleZoom(1.25)}
-                          className={`p-2 rounded-full ${darkMode ? 'bg-gray-800' : 'bg-white'} text-gray-700 shadow-md`}
+                          className={`p-1.5 sm:p-2 rounded-full ${darkMode ? 'bg-gray-800' : 'bg-white'} text-gray-700 shadow-md`}
                           disabled={zoomLevel >= 4}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                           </svg>
                         </button>
                         <button
                           onClick={() => handleZoom(0.8)}
-                          className={`p-2 rounded-full ${darkMode ? 'bg-gray-800' : 'bg-white'} text-gray-700 shadow-md`}
+                          className={`p-1.5 sm:p-2 rounded-full ${darkMode ? 'bg-gray-800' : 'bg-white'} text-gray-700 shadow-md`}
                           disabled={zoomLevel <= 1}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                           </svg>
                         </button>
-              <button
+                        <button
                           onClick={resetZoom}
-                          className={`p-2 rounded-full ${darkMode ? 'bg-gray-800' : 'bg-white'} text-gray-700 shadow-md`}
-              >
-                          <ArrowsPointingOutIcon className="h-5 w-5" />
-              </button>
+                          className={`p-1.5 sm:p-2 rounded-full ${darkMode ? 'bg-gray-800' : 'bg-white'} text-gray-700 shadow-md`}
+                        >
+                          <ArrowsPointingOutIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                        </button>
 
                         {/* AR View Toggle */}
                         <button
                           onClick={toggleARMode}
-                          className={`p-2 rounded-full ${darkMode ? 'bg-gray-800' : 'bg-white'} text-gray-700 shadow-md`}
+                          className={`p-1.5 sm:p-2 rounded-full ${darkMode ? 'bg-gray-800' : 'bg-white'} text-gray-700 shadow-md`}
                           title="Try on your wall with AR"
                         >
-                          <CameraIcon className="h-5 w-5" />
+                          <CameraIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                         </button>
                       </div>
 
                       {/* Image navigation */}
-                      <div className="absolute left-0 right-0 top-1/2 transform -translate-y-1/2 flex justify-between px-4 z-20">
+                      <div className="absolute left-0 right-0 top-1/2 transform -translate-y-1/2 flex justify-between px-2 sm:px-4 z-20">
                         <button
                           onClick={(e) => { e.stopPropagation(); prevPainting(); }}
-                          className={`p-3 rounded-full ${theme.button} text-white shadow-lg opacity-80 hover:opacity-100`}
+                          className={`p-2 sm:p-3 rounded-full ${theme.button} text-white shadow-lg opacity-80 hover:opacity-100`}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                           </svg>
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); nextPainting(); }}
-                          className={`p-3 rounded-full ${theme.button} text-white shadow-lg opacity-80 hover:opacity-100`}
+                          className={`p-2 sm:p-3 rounded-full ${theme.button} text-white shadow-lg opacity-80 hover:opacity-100`}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         </button>
@@ -1038,19 +1038,19 @@ const PaintingLibrary = () => {
 
                       {/* Zoomable image */}
                       <div 
-                        className="relative h-[40vh] md:h-[60vh] flex items-center justify-center bg-black bg-opacity-20 rounded-lg overflow-hidden"
+                        className="relative h-[30vh] sm:h-[40vh] md:h-[60vh] flex items-center justify-center bg-black bg-opacity-20 rounded-lg overflow-hidden"
                         onMouseDown={handleMouseDown}
                       >
                         <img
                           ref={modalImageRef}
                           src={selectedPainting.image}
                           alt={selectedPainting.title}
-                          className="max-w-full max-h-full transition-transform duration-100"
+                          className="max-w-full max-h-full object-contain transition-transform duration-100"
                           style={{ transform: `scale(${zoomLevel})` }}
                           draggable="false"
                         />
                         {zoomLevel === 1 ? (
-                          <div className="absolute bottom-3 right-3 text-xs bg-black bg-opacity-50 text-white py-1 px-2 rounded">
+                          <div className="absolute bottom-3 right-3 text-xs bg-black bg-opacity-50 text-white py-1 px-2 rounded hidden sm:block">
                             Click and drag to pan when zoomed
                           </div>
                         ) : null}
@@ -1058,7 +1058,7 @@ const PaintingLibrary = () => {
                     </>
                   ) : (
                     /* AR View */
-                    <div className="relative h-[40vh] md:h-[60vh] bg-black rounded-lg overflow-hidden">
+                    <div className="relative h-[30vh] sm:h-[40vh] md:h-[60vh] bg-black rounded-lg overflow-hidden">
                       <div className="absolute inset-0 flex items-center justify-center z-20">
                         <video 
                           ref={videoRef}
@@ -1083,10 +1083,10 @@ const PaintingLibrary = () => {
                         </div>
                         
                         {/* AR Painting Image */}
-              <img
-                src={selectedPainting.image}
-                alt={selectedPainting.title}
-                          className="max-w-[80%] max-h-[80%] z-10 border-8 border-white shadow-2xl"
+                        <img
+                          src={selectedPainting.image}
+                          alt={selectedPainting.title}
+                          className="max-w-[80%] max-h-[80%] z-10 border-8 border-white shadow-2xl object-contain"
                           style={{ 
                             transform: 'perspective(1000px) rotateY(-5deg)',
                             transformOrigin: 'center' 
@@ -1096,21 +1096,21 @@ const PaintingLibrary = () => {
                         
                         {/* AR Instructions */}
                         <div className="absolute bottom-4 left-0 right-0 text-center">
-                          <div className="bg-black bg-opacity-70 text-white py-2 px-4 rounded-lg mx-auto inline-block">
+                          <div className="bg-black bg-opacity-70 text-white py-2 px-4 rounded-lg mx-auto inline-block text-sm sm:text-base">
                             <p>Move your device to place the artwork on your wall</p>
-                            <p className="text-sm text-gray-300 mt-1">Drag the artwork to resize and position</p>
+                            <p className="text-xs sm:text-sm text-gray-300 mt-1">Drag the artwork to resize and position</p>
                           </div>
                         </div>
                       </div>
                     </div>
                   )}
-            </div>
+                </div>
 
-            {/* Painting Details */}
-                <div className={`w-full md:w-1/3 flex flex-col ${theme.secondary} overflow-y-auto`}>
-                  <h2 className={`text-2xl font-bold mb-4 ${theme.text}`}>{selectedPainting.title}</h2>
+                {/* Painting Details */}
+                <div className={`w-full md:w-1/3 flex flex-col ${theme.secondary} mt-4 md:mt-0`}>
+                  <h2 className={`text-xl sm:text-2xl font-bold mb-3 sm:mb-4 ${theme.text}`}>{selectedPainting.title}</h2>
                   
-                  <div className="space-y-3 mb-6">
+                  <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6 text-sm sm:text-base">
                     <p>
                       <strong className="font-semibold">Medium:</strong> {selectedPainting.medium}
                     </p>
@@ -1120,16 +1120,16 @@ const PaintingLibrary = () => {
                     <p>
                       <strong className="font-semibold">Notes:</strong> {selectedPainting.notes}
                     </p>
-                    <p className={`text-xl font-semibold mt-4 ${theme.text}`}>
-                <strong>Price:</strong> {selectedPainting.price}
-              </p>
-            </div>
+                    <p className={`text-lg sm:text-xl font-semibold mt-3 sm:mt-4 ${theme.text}`}>
+                      <strong>Price:</strong> {selectedPainting.price}
+                    </p>
+                  </div>
                   
-                  <div className="mt-auto space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
+                  <div className="mt-auto space-y-2 sm:space-y-3">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       <button
                         onClick={() => toggleFavorite(selectedPainting.id)}
-                        className={`py-3 rounded-lg flex items-center justify-center gap-2 transition ${
+                        className={`py-2 sm:py-3 rounded-lg flex items-center justify-center gap-1 sm:gap-2 transition text-sm sm:text-base ${
                           isFavorite(selectedPainting.id)
                             ? "bg-red-600 text-white hover:bg-red-700"
                             : darkMode 
@@ -1139,12 +1139,12 @@ const PaintingLibrary = () => {
                       >
                         {isFavorite(selectedPainting.id) ? (
                           <>
-                            <HeartIconSolid className="w-5 h-5" />
+                            <HeartIconSolid className="w-4 h-4 sm:w-5 sm:h-5" />
                             <span>Remove</span>
                           </>
                         ) : (
                           <>
-                            <HeartIcon className="w-5 h-5" />
+                            <HeartIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                             <span>Favorite</span>
                           </>
                         )}
@@ -1152,7 +1152,7 @@ const PaintingLibrary = () => {
                       
                       <button
                         onClick={() => toggleComparisonPainting(selectedPainting)}
-                        className={`py-3 rounded-lg flex items-center justify-center gap-2 transition ${
+                        className={`py-2 sm:py-3 rounded-lg flex items-center justify-center gap-1 sm:gap-2 transition text-sm sm:text-base ${
                           isInComparison(selectedPainting.id)
                             ? "bg-indigo-600 text-white hover:bg-indigo-700"
                             : darkMode 
@@ -1160,38 +1160,38 @@ const PaintingLibrary = () => {
                               : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                         }`}
                       >
-                        <ArrowsRightLeftIcon className="w-5 h-5" />
+                        <ArrowsRightLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span>{isInComparison(selectedPainting.id) ? "Remove" : "Compare"}</span>
                       </button>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       <button
                         onClick={() => sharePainting(selectedPainting)}
-                        className={`py-3 rounded-lg flex items-center justify-center gap-2 ${
+                        className={`py-2 sm:py-3 rounded-lg flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base ${
                           darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                         }`}
                       >
-                        <ShareIcon className="w-5 h-5" />
+                        <ShareIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span>Share</span>
                       </button>
                       
                       <button
                         onClick={!isARMode ? toggleARMode : null}
-                        className={`py-3 rounded-lg flex items-center justify-center gap-2 ${
+                        className={`py-2 sm:py-3 rounded-lg flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base ${
                           isARMode 
                             ? "bg-gray-500 text-gray-300 cursor-not-allowed" 
                             : `${theme.button} text-white`
                         }`}
                         disabled={isARMode}
                       >
-                        <CameraIcon className="w-5 h-5" />
+                        <CameraIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span>Try on Wall</span>
                       </button>
                     </div>
                     
                     <Link href="/contact" className="block w-full">
-                      <button className={`w-full py-3 ${theme.button} text-white rounded-lg transition`}>
+                      <button className={`w-full py-2 sm:py-3 text-sm sm:text-base ${theme.button} text-white rounded-lg transition`}>
                         Inquire About This Piece
                       </button>
                     </Link>
@@ -1201,13 +1201,13 @@ const PaintingLibrary = () => {
                         closeModal();
                         setViewMode("wall");
                       }}
-                      className={`w-full py-3 ${darkMode ? 'bg-indigo-900 hover:bg-indigo-800' : 'bg-amber-600 hover:bg-amber-700'} text-white rounded-lg transition flex items-center justify-center gap-2`}
+                      className={`w-full py-2 sm:py-3 text-sm sm:text-base ${darkMode ? 'bg-indigo-900 hover:bg-indigo-800' : 'bg-amber-600 hover:bg-amber-700'} text-white rounded-lg transition flex items-center justify-center gap-1 sm:gap-2`}
                     >
                       <span>See on Interactive Wall</span>
                     </button>
-            </div>
-          </div>
-        </div>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
       )}
