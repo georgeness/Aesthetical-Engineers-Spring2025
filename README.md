@@ -67,6 +67,6 @@ If you encounter any issues during setup:
 1. Make sure all prerequisites are correctly installed
 2. Verify that you're using the correct Node.js version
 3. Check that all environment variables are properly set
-4. Ensure MongoDB abd Vercel connection is working properly
+4. Ensure MongoDB and Vercel connections are working properly
 
 ` vercel --prod ` - is a command used to deploy your application to Vercel's production environment.
