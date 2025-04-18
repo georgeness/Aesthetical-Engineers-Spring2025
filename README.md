@@ -24,15 +24,14 @@
    
 
 2. Navigate to the Project Directory
-   `
-   cd Aesthetical-Engineers-Spring2025
    
-   `
-3. Open the Project in VS Code
+   ` cd Aesthetical-Engineers-Spring2025 `
+   
+4. Open the Project in VS Code
    
    ` code . `
 
-4. Install Dependencies
+5. Install Dependencies
    In the VS Code terminal (Terminal > New Terminal), run:
    
    ` npm install `
@@ -44,11 +43,11 @@
    - 3D rendering libraries (Three.js)
    - UI components and styling tools
 
-5. Environment Setup
+6. Environment Setup
    The project uses environment variables for database connections and other services. 
    Check if default `.env` file is included
 
-6. Start the Development Server
+7. Start the Development Server
 
    ` npm run dev `
    
