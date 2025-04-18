@@ -27,9 +27,9 @@ const PaintingLibrary = () => {
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("museumDarkMode");
-      return saved ? JSON.parse(saved) : true;
+      return saved ? JSON.parse(saved) : false;
     }
-    return true;
+    return false;
   });
   const [filterMedium, setFilterMedium] = useState("all");
   const [sortOption, setSortOption] = useState("default");
