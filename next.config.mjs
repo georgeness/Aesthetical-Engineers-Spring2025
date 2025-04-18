@@ -9,7 +9,6 @@ const nextConfig = {
       basePath: '/Aesthetical-Engineers-Spring2025',
       images: {
         unoptimized: true,
-        domains: ['bhvqdgbwuom91t7g.public.blob.vercel-storage.com'],
       },
     }),
   };

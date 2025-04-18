@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -9,6 +9,31 @@ const Nav = () => {
   // State to track login status and username
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('George');
+  
+  // Refs for navigation elements
+  const desktopNavRef = useRef(null);
+  const mobileNavRef = useRef(null);
+  
+  // Update display based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768; // md breakpoint is 768px in Tailwind
+      
+      if (desktopNavRef.current && mobileNavRef.current) {
+        desktopNavRef.current.style.display = isMobile ? 'none' : 'flex';
+        mobileNavRef.current.style.display = isMobile ? 'block' : 'none';
+      }
+    };
+    
+    // Initial call
+    handleResize();
+    
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   // Check login status on component mount and when storage changes
   useEffect(() => {
@@ -50,8 +75,8 @@ const Nav = () => {
 
   return (
     <>
-      {/* -- Desktop Nav */}
-      <nav className="hidden md:flex flex-between w-full mb-16 pt-7 px-4">
+      {/* -- Desktop Nav -- */}
+      <nav ref={desktopNavRef} className="hidden md:flex flex-between w-full mb-16 pt-7 px-4">
         <Link href="/" className="flex gap-2 flex-center mr-auto">
           <Image
             src="/images/other/signature.png"
@@ -105,7 +130,7 @@ const Nav = () => {
       </nav>
 
       {/* -- Mobile Nav (shown only if width < md) -- */}
-      <div className="md:hidden w-full px-4 mb-2">
+      <div ref={mobileNavRef} className="md:hidden w-full px-4 mb-2">
         {/* Top bar with logo & hamburger button */}
         <div className="flex items-center justify-between pt-2">
           <Link href="/" className="flex gap-2 flex-center">

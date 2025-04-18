@@ -590,8 +590,11 @@ const PaintingLibrary = () => {
       {/* No results message */}
       {filteredPaintings.length === 0 && !comparisonMode && (
         <div className="w-full max-w-7xl px-4 py-8 text-center">
-          <h2 className="text-xl mb-2">No paintings found</h2>
-          <p className={theme.secondary}>Try adjusting your filters or search terms</p>
+          <div className="animate-pulse flex flex-col items-center">
+            <div className="w-12 h-12 border-2 border-t-transparent border-orange-500 rounded-full animate-spin mb-4"></div>
+            <h2 className="text-xl mb-2">Loading...</h2>
+            <p className={theme.secondary}>Please wait while we fetch the paintings</p>
+          </div>
         </div>
       )}
       
