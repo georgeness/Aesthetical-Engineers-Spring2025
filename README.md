@@ -1,86 +1,76 @@
-# Aesthetical-Engineers-Spring25
-Prerequisites
+# GergeLupo Website
 
-Windows 10/11
+## Prerequisites
 
-WSL (Ubuntu) installed. (wsl --install)
-Follow Microsoft’s guide to install WSL.
+- Windows 10/11
+- WSL (Ubuntu) installed
+  - Run `wsl --install` in VS Code or PowerShell/Command Prompt if not already installed
+  - Follow Microsoft's guide (https://docs.microsoft.com/en-us/windows/wsl/install) for detailed instructions
+- VS Code installed
+  - Download from (https://code.visualstudio.com/) 
+  - Install the "Remote - WSL" extension in VS Code
+- Node.js and npm installed in WSL
+  - Run in Ubuntu/WSL terminal:
+    `
+    sudo apt update && sudo apt install nodejs npm
+    `
+  - Recommended Node.js version: v16 or higher
 
-VS Code installed.
-Download VS Code.
+## Setup Instructions
 
-Node.js installed in WSL.
-Run in Ubuntu/WSL:
-
-sudo apt update && sudo apt install nodejs npm
-
-Setup Instructions
 1. Clone the Repository
-Open Ubuntu/WSL ('wsl" command can be used) and run:
-
-git clone https://github.com/georgeness/Aesthetical-Engineers-Spring2025.git
+   `
+   git clone https://github.com/georgeness/Aesthetical-Engineers-Spring2025.git
+   `
 
 2. Navigate to the Project Directory
-The repository might clone into a nested folder. Move into the correct directory:
-
-cd Aesthetical-Engineers-Spring2025/Aesthetical-Engineers-Spring2025-master
-
-
+   `
+   cd Aesthetical-Engineers-Spring2025
+   
+   `
 3. Open the Project in VS Code
-From the Ubuntu/WSL terminal, open VS Code:
-
-code .
+   `
+   code .
+   `
 
 4. Install Dependencies
-In the VS Code terminal (Terminal > New Terminal), run:
+   In the VS Code terminal (Terminal > New Terminal), run:
+   `
+   npm install
+   `
+   
+   This will install all required dependencies including:
+   - Next.js (React framework)
+   - MongoDB tools
+   - Authentication libraries
+   - 3D rendering libraries (Three.js)
+   - UI components and styling tools
 
-npm install
+5. Environment Setup
+   The project uses environment variables for database connections and other services. 
+   Check if default `.env` file is included
 
-5. Start the Development Server
-Run the Next.js development script:
+6. Start the Development Server
+   `  
+   npm run dev 
+   `
+   
+   
+   The application will be available at http://localhost:3000
 
-npm run dev
+## Additional Information
 
+- Database: The project uses MongoDB Atlas. The connection string is provided in the `.env` file.
+- Authentication: User authentication is handled through Next-Auth.
+- File Storage: The project uses Vercel Blob Storage for media files.
 
-Option 2
- 
-Step 1: Install Ubuntu and WSL 
+## Troubleshooting
 
-Step 2: Open Ubuntu
+If you encounter any issues during setup:
 
-Step 3 (Optional): Create a folder to place the project into by using: 
-```
-mkdir "directory name"
-```
-Then navigate to the directory you want to place the project in by using:
-```
-cd "directory name"
-```
+1. Make sure all prerequisites are correctly installed
+2. Verify that you're using the correct Node.js version
+3. Check that all environment variables are properly set
+4. Ensure MongoDB abd Vercel connection is working properly
 
-Step 4: Clone repository by using: 
-```
-git clone https://github.com/georgeness/Aesthetical-Engineers-Spring2025.git
-```
-
-Step 5: Move into the cloned repository by using: 
-```
-cd Aesthetical-Engineers-Spring2025
-```
-
-Step 6: Open code by using: 
-```
-code .
-```
-
-Step 7: Visual Studio Code should open. In the top banner, navigate to Terminal>New Terminal
-
-Step 8: In this new terminal, install the required packages needed to run the project by using:
-```
-npm install
-```
-
-Step 9: Finally, to launch the website as a localhost, use this line in the terminal open in Visual Studio Code and click the link it provides: 
-```
-npm run dev
-```
-
+` vercel --prod ` - is a command used to deploy your application to Vercel's production environment.
