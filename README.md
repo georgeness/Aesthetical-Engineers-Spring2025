@@ -11,17 +11,17 @@
   - Install the "Remote - WSL" extension in VS Code
 - Node.js and npm installed in WSL
   - Run in Ubuntu/WSL terminal:
-    `
-    sudo apt update && sudo apt install nodejs npm
-    `
+    
+    ` sudo apt update && sudo apt install nodejs npm `
+    
   - Recommended Node.js version: v16 or higher
 
 ## Setup Instructions
 
 1. Clone the Repository
-   `
-   git clone https://github.com/georgeness/Aesthetical-Engineers-Spring2025.git
-   `
+   
+   ` git clone https://github.com/georgeness/Aesthetical-Engineers-Spring2025.git `
+   
 
 2. Navigate to the Project Directory
    `
@@ -29,15 +29,13 @@
    
    `
 3. Open the Project in VS Code
-   `
-   code .
-   `
+   
+   ` code . `
 
 4. Install Dependencies
    In the VS Code terminal (Terminal > New Terminal), run:
-   `
-   npm install
-   `
+   
+   ` npm install `
    
    This will install all required dependencies including:
    - Next.js (React framework)
@@ -51,9 +49,8 @@
    Check if default `.env` file is included
 
 6. Start the Development Server
-   `  
-   npm run dev 
-   `
+
+   ` npm run dev `
    
    
    The application will be available at http://localhost:3000
