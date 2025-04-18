@@ -23,28 +23,27 @@ const CAROUSEL = [
 
 const HomePage = () => {
   return (
-    <main className="w-full flex flex-col items-center justify-center p-6">
+    <main className="w-full flex flex-col items-center justify-center p-3 md:p-6">
       {/* Welcome Section */}
       <section className="w-full flex flex-col items-center text-center relative z-40">
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl px-6 py-4 mb-8 z-50 relative">
+        <div className="px-4 py-2 md:px-6 md:py-4 mb-4 md:mb-8 z-50 relative">
           <h1
             className="
               font-bold
               transition-opacity
               duration-700
               opacity-90
-              text-4xl
-              sm:text-5xl
+              text-3xl
+              sm:text-4xl
               md:text-6xl
               lg:text-7xl
-              leading-snug
+              leading-tight
               max-w-xs
               sm:max-w-lg
               md:max-w-2xl
               mx-auto
               break-words
               z-50
-              drop-shadow-sm
             "
           >
             Welcome
@@ -57,17 +56,18 @@ const HomePage = () => {
                 bg-clip-text
                 text-transparent
                 font-extrabold
-                text-5xl
-                sm:text-6xl
+                text-4xl
+                sm:text-5xl
                 md:text-7xl
                 lg:text-8xl
-                leading-relaxed
+                leading-tight
                 break-words
                 block
                 align-baseline
                 z-50
                 drop-shadow
-                mb-2
+                mb-0
+                md:mb-2
               "
             >
               Paintings
@@ -76,17 +76,19 @@ const HomePage = () => {
         </div>
 
         {/* Image Carousel */}
-        <div className="w-full max-w-4xl mt-4 animate-fadeIn px-2 sm:px-6 relative z-30">
+        <div className="w-full max-w-4xl mt-2 md:mt-4 animate-fadeIn px-0 sm:px-6 relative z-30">
           <ImageCarousel imageUrls={CAROUSEL} />
         </div>
 
         {/* Buttons */}
-        <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-4 mt-6 relative z-40">
+        <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-3 mt-3 md:mt-6 relative z-40">
           <Link href="/about">
             <button
               className="
-                px-8
-                py-3
+                px-6
+                py-2
+                md:px-8
+                md:py-3
                 bg-gradient-to-r
                 from-orange-500
                 to-yellow-500
@@ -108,8 +110,10 @@ const HomePage = () => {
           <Link href="/museum">
             <button
               className="
-                px-8
-                py-3
+                px-6
+                py-2
+                md:px-8
+                md:py-3
                 bg-gradient-to-r
                 from-purple-500
                 to-indigo-600

@@ -16,6 +16,7 @@
     "@heroicons/react": "^2.2.0",
     "@react-three/drei": "^9.56.11",
     "@react-three/fiber": "^8.15.10",
+    "@vercel/blob": "^1.0.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "dotenv": "^16.5.0",

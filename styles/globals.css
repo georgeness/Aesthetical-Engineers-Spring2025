@@ -76,7 +76,8 @@ button:disabled, input:disabled, select:disabled, textarea:disabled,
 
 .main:after {
   content: "";
-  background-image: url("/assets/images/grid.svg");
+  /* Remove grid.svg which is causing 404 errors */
+  /* background-image: url("/assets/images/grid.svg"); */
   z-index: 1;
   position: absolute;
   width: 100%;

@@ -1,0 +1,54 @@
+[33mdb0e770[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m Update page.jsx
+[33m57e9357[m Optimize CompareView and PaintingLibrary components for better performance and mobile compatibility
+[33mf4e9ebd[m Fix authentication for file uploads
+[33m60ed16b[m Improve error handling for file uploads
+[33m96108a0[m Fix file upload using Vercel Blob Storage
+[33ma341aa3[m Fix configuration for Vercel deployment
+[33m13c99f8[m Update workflow to trigger on master branch
+[33m1d0989c[m Configure for GitHub Pages deployment
+[33m2c17bdd[m ,
+[33m4a98d4b[m ,
+[33m3a7dda3[m ,
+[33md4a30d1[m ,
+[33m5839a02[m Prototype login hub
+[33m8cecef7[m Fixed encryption and login
+[33ma7a3917[m added features to collection page
+[33mba4d9c8[m added features to Collection page
+[33mc565384[m 3d museum
+[33mbc33b3c[m Major Grocery Features Update: - Expanded from 5 to 8 categories - Added 70+ grocery items with units (gallon, lb, oz) - Sorting for all columns (clickable headers) - Filtering by item name and category - Expand/collapse view for categories - Highlighted best prices and best store per category - Unit price display and potential savings calculator - Two-step flow: enter ZIP code, then select items - Select individual items, entire categories, or all - Clear all and item counter added - Organized item selection by category - Colored best prices and 'Best Deal' tags - Improved sorting visuals and logic
+[33m4204b6c[m Merge branch 'master' of https://github.com/georgeness/Aesthetical-Engineers-Spring2025
+[33mfbacf4f[m Adding backend login infrastructure
+[33m35d1381[m .
+[33me278174[m .
+[33md6de285[m Made  About me  page mobile friendly
+[33m6092470[m Made  Collection page mobile friendly
+[33ma679122[m Fixed 'Modified Nav, added hamburger manu
+[33mefb02ab[m Fixed 'Welcome Paintings' text overflow, optimized mobile responsiveness, and improved Next/Image integration, updated page.jsx
+[33m8e900c1[m Optimized  ImageCarousel.tsx
+[33m02f2fa3[m Updated layout.sx, and  New for mobile responsiveness
+[33md2c3dd5[m Updated Nav.jsx for mobile responsiveness
+[33mdb2be24[m minor updates
+[33macbb34c[m updated contact page
+[33m5d833e3[m Added basics for contact page, will develop further
+[33m9f8ddd8[m Updated layout.jsx
+[33m88bae3a[m update Collection, about, layout, login, and home pages; modify package.json and package-lock.json; add new API directory and MessageWidget component
+[33m7cb5885[m improved optimization
+[33m7bda3f5[m Updated app/page.jsx and components/image-carousel.css
+[33m6c2acc8[m '
+[33m287c786[m Added features
+[33m674093b[m Updated app/Collection/page.jsx, added errows and enlarging image
+[33m0e95733[m .
+[33m7b84834[m ,
+[33m9d9261a[m Updated text layouts and Added Awards & Exhibitions Achievements
+[33m9bf3bd4[m created app/about, app/Collection//, modified app/page.jsx
+[33meb0b5e7[m Updated components/Nav.jsx. Created app/library/ and app/login/ pages
+[33mfc02e98[m Updated Redme
+[33ma289ff1[m Patched security vulnerabilities
+[33mff24d23[m Update README.md
+[33m48958a9[m Update README.md
+[33mfba9f69[m Update README.md
+[33m549cb1c[m Update README.md
+[33m7937808[m Update README.md
+[33m80123da[m Update README.md
+[33m371cf64[m Fixed missing app contents
+[33md6983da[m[33m ([m[1;31morigin/test[m[33m)[m initial commit
