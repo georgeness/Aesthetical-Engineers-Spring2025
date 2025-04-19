@@ -20,6 +20,21 @@ import {
 } from "@heroicons/react/24/solid";
 
 const PaintingLibrary = () => {
+  const safeRender = (callback, fallback = null) => {
+    try {
+      return callback();
+    } catch (error) {
+      console.error('Render error:', error);
+      return fallback;
+    }
+  };
+  
+  // Safe property access helper
+  const getPaintingProperty = (painting, property, defaultValue = '') => {
+    if (!painting) return defaultValue;
+    return painting[property] || defaultValue;
+  };
+
   // All state hooks must be declared first, in a consistent order
   // State for UI controls
   const [isMounted, setIsMounted] = useState(false);
@@ -78,7 +93,12 @@ const PaintingLibrary = () => {
     if (typeof window !== "undefined") {
       const savedFavorites = localStorage.getItem("favorites");
       if (savedFavorites) {
-        setFavorites(JSON.parse(savedFavorites));
+        try {
+          setFavorites(JSON.parse(savedFavorites));
+        } catch (e) {
+          console.error('Error parsing favorites:', e);
+          setFavorites([]);
+        }
       }
       
       // Fetch paintings from API
@@ -91,15 +111,15 @@ const PaintingLibrary = () => {
           const data = await response.json();
           
           // If no paintings are returned from API, use sample data
-          if (data && data.length > 0) {
+          if (data && Array.isArray(data) && data.length > 0) {
             setPaintings(data);
           } else {
-            console.warn('No paintings returned from API');
+            console.warn('No paintings returned from API, using empty array');
             setPaintings([]);
           }
         } catch (error) {
           console.error('Error fetching paintings:', error);
-          setMobileError('Failed to load paintings. Please try again.');
+          setPaintings([]); // Set empty array on error to prevent undefined
         }
       };
       
@@ -204,12 +224,6 @@ const PaintingLibrary = () => {
     }
   };
 
-  // Add safe access for painting data
-  const getPaintingProperty = (painting, property, defaultValue = '') => {
-    if (!painting) return defaultValue;
-    return painting[property] || defaultValue;
-  };
-
   // Add or remove painting from comparison
   const toggleComparisonPainting = (painting) => {
     if (!painting || !painting._id) return;
@@ -228,8 +242,8 @@ const PaintingLibrary = () => {
 
   // Check if painting is in comparison
   const isInComparison = (id) => {
-    if (!id) return false;
-    return comparisonPaintings.some(p => p._id === id);
+    if (!id || !Array.isArray(comparisonPaintings)) return false;
+    return comparisonPaintings.some(p => p && p._id === id);
   };
 
   // Clear all comparison paintings
@@ -297,21 +311,23 @@ const PaintingLibrary = () => {
 
   // Check if painting is favorite
   const isFavorite = (id) => {
-    if (!id) return false;
+    if (!id || !Array.isArray(favorites)) return false;
     return favorites.includes(id);
   };
 
   // Function to open modal with selected painting
   const openModal = (index) => {
-    if (index < 0 || index >= filteredPaintings.length) return;
     try {
+      if (!Array.isArray(filteredPaintings) || index < 0 || index >= filteredPaintings.length) return;
+      const painting = filteredPaintings[index];
+      if (!painting) return;
+      
       setCurrentIndex(index);
-      setSelectedPainting(filteredPaintings[index]);
+      setSelectedPainting(painting);
       setZoomLevel(1);
       imagePosition.current = { x: 0, y: 0 };
     } catch (error) {
       console.error('Error opening modal:', error);
-      setMobileError('Could not open painting details. Please try again.');
     }
   };
 
@@ -424,44 +440,53 @@ const PaintingLibrary = () => {
 
   // Filter and sort paintings
   const getFilteredAndSortedPaintings = () => {
-    let result = [...paintings];
-    
-    // Apply search filter
-    if (searchTerm) {
-      result = result.filter(p => 
-        (p?.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (p?.notes?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (p?.medium?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-      );
+    try {
+      if (!Array.isArray(paintings)) return [];
+      
+      let result = [...paintings];
+      
+      // Apply search filter
+      if (searchTerm) {
+        result = result.filter(p => 
+          p && (
+            (p.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (p.notes?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (p.medium?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+          )
+        );
+      }
+      
+      // Apply medium filter
+      if (filterMedium !== "all") {
+        result = result.filter(p => p && p.medium === filterMedium);
+      }
+      
+      // Apply favorites filter
+      if (showOnlyFavorites) {
+        result = result.filter(p => p && p._id && favorites.includes(p._id));
+      }
+      
+      // Apply sorting
+      switch (sortOption) {
+        case "priceAsc":
+          result.sort((a, b) => parseInt((a?.price || '').replace(/\D/g, '') || '0') - parseInt((b?.price || '').replace(/\D/g, '') || '0'));
+          break;
+        case "priceDesc":
+          result.sort((a, b) => parseInt((b?.price || '').replace(/\D/g, '') || '0') - parseInt((a?.price || '').replace(/\D/g, '') || '0'));
+          break;
+        case "title":
+          result.sort((a, b) => (a?.title || '').localeCompare(b?.title || ''));
+          break;
+        default:
+          // Use default order
+          break;
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error in getFilteredAndSortedPaintings:', error);
+      return [];
     }
-    
-    // Apply medium filter
-    if (filterMedium !== "all") {
-      result = result.filter(p => p?.medium === filterMedium);
-    }
-    
-    // Apply favorites filter
-    if (showOnlyFavorites) {
-      result = result.filter(p => favorites.includes(p?._id));
-    }
-    
-    // Apply sorting
-    switch (sortOption) {
-      case "priceAsc":
-        result.sort((a, b) => parseInt((a?.price || '').replace(/\D/g, '') || '0') - parseInt((b?.price || '').replace(/\D/g, '') || '0'));
-        break;
-      case "priceDesc":
-        result.sort((a, b) => parseInt((b?.price || '').replace(/\D/g, '') || '0') - parseInt((a?.price || '').replace(/\D/g, '') || '0'));
-        break;
-      case "title":
-        result.sort((a, b) => (a?.title || '').localeCompare(b?.title || ''));
-        break;
-      default:
-        // Use default order
-        break;
-    }
-    
-    return result;
   };
 
   // Get display theme classes
@@ -509,7 +534,7 @@ const PaintingLibrary = () => {
     }
   };
 
-  return (
+  return safeRender(() => (
     <div className={`min-h-screen w-full flex flex-col items-center py-4 transition-colors duration-300 ${theme.bg} ${theme.text}`}>
       {/* Header with controls */}
       <div className="w-full max-w-7xl px-4 mb-6">
@@ -838,7 +863,7 @@ const PaintingLibrary = () => {
       )}
       
       {/* Wall View */}
-      {viewMode === "wall" && filteredPaintings.length > 0 && !comparisonMode && (
+      {viewMode === "wall" && Array.isArray(filteredPaintings) && filteredPaintings.length > 0 && !comparisonMode && (
         <div className="w-full max-w-7xl px-0 sm:px-4">
           <div 
             className={`relative w-full h-[80vh] rounded-lg overflow-hidden ${
@@ -970,11 +995,11 @@ const PaintingLibrary = () => {
       )}
       
       {/* Grid View */}
-      {viewMode === "grid" && (
+      {viewMode === "grid" && Array.isArray(filteredPaintings) && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 w-full max-w-7xl px-4">
-          {filteredPaintings.map((painting, index) => (
+          {filteredPaintings.map((painting, index) => painting && painting._id ? (
             <motion.div
-              key={painting?._id || index}
+              key={painting._id}
               className={`${theme.card} p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden`}
               whileHover={{ y: -5 }}
               initial={{ opacity: 0, y: 20 }}
@@ -986,14 +1011,14 @@ const PaintingLibrary = () => {
                   src={getPaintingProperty(painting, 'image', '/placeholder-image.jpg')}
                   alt={getPaintingProperty(painting, 'title', 'Artwork')}
                   className="w-full h-auto mb-4 rounded cursor-pointer transform transition duration-300 group-hover:brightness-90"
-                  onClick={() => openModal(filteredPaintings.findIndex(p => p._id === painting?._id))}
+                  onClick={() => openModal(filteredPaintings.findIndex(p => p._id === painting._id))}
                 />
                 <div className="absolute top-2 right-2 flex space-x-1">
                   <button
-                    onClick={(e) => { e.stopPropagation(); toggleFavorite(painting?._id); }}
+                    onClick={(e) => { e.stopPropagation(); toggleFavorite(painting._id); }}
                     className="p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 text-red-500 transition-all duration-200 shadow-md transform hover:scale-110"
                   >
-                    {isFavorite(painting?._id) ? (
+                    {isFavorite(painting._id) ? (
                       <HeartIconSolid className="w-5 h-5" />
                     ) : (
                       <HeartIcon className="w-5 h-5" />
@@ -1002,7 +1027,7 @@ const PaintingLibrary = () => {
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleComparisonPainting(painting); }}
                     className={`p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-md transform hover:scale-110 ${
-                      isInComparison(painting?._id) ? "text-indigo-600" : "text-gray-600"
+                      isInComparison(painting._id) ? "text-indigo-600" : "text-gray-600"
                     }`}
                   >
                     <ArrowsRightLeftIcon className="w-5 h-5" />
@@ -1020,78 +1045,81 @@ const PaintingLibrary = () => {
                 <strong>Price:</strong> {getPaintingProperty(painting, 'price', 'Price on request')}
               </p>
             </motion.div>
-          ))}
+          ) : null)}
         </div>
       )}
       
       {/* List View */}
-      {viewMode === "list" && (
+      {viewMode === "list" && Array.isArray(filteredPaintings) && (
         <div className="w-full max-w-7xl px-4">
-          {filteredPaintings.map((painting, index) => (
-            <motion.div
-              key={painting._id}
-              className={`${theme.card} p-4 mb-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden`}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-            >
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative w-full md:w-40 h-40 flex-shrink-0">
-                  <img
-                    src={painting.image}
-                    alt={painting.title}
-                    className="w-full h-full object-cover rounded cursor-pointer"
-                    onClick={() => openModal(filteredPaintings.findIndex(p => p._id === painting._id))}
-                  />
-                  <div className="absolute top-2 right-2 flex space-x-1">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); toggleFavorite(painting._id); }}
-                      className="p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 text-red-500 transition-all duration-200 shadow-md transform hover:scale-110"
-                    >
-                      {isFavorite(painting._id) ? (
-                        <HeartIconSolid className="w-5 h-5" />
-                      ) : (
-                        <HeartIcon className="w-5 h-5" />
-                      )}
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); toggleComparisonPainting(painting); }}
-                      className={`p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-md transform hover:scale-110 ${
-                        isInComparison(painting._id) ? "text-indigo-600" : "text-gray-600"
-                      }`}
-                    >
-                      <ArrowsRightLeftIcon className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-                <div className="flex-grow">
-                  <h2 className="text-lg md:text-xl font-bold mb-1">{painting.title}</h2>
-                  <div className="grid grid-cols-2 gap-2 mb-2">
-                    <p className={`text-sm ${theme.secondary}`}>
-                      <strong>Medium:</strong> {painting.medium}
-                    </p>
-                    <p className={`text-sm ${theme.secondary}`}>
-                      <strong>Dimensions:</strong> {painting.dimensions}
-                    </p>
-                  </div>
-                  <p className={`text-sm ${theme.secondary} mb-2`}>
-                    <strong>Notes:</strong> {painting.notes}
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <p className="text-lg font-semibold">
-                      <strong>Price:</strong> {painting.price}
-                    </p>
-                    <button 
+          {filteredPaintings.map((painting, index) => {
+            if (!painting || !painting._id) return null;
+            return (
+              <motion.div
+                key={painting._id}
+                className={`${theme.card} p-4 mb-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden`}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="relative w-full md:w-40 h-40 flex-shrink-0">
+                    <img
+                      src={painting.image}
+                      alt={painting.title}
+                      className="w-full h-full object-cover rounded cursor-pointer"
                       onClick={() => openModal(filteredPaintings.findIndex(p => p._id === painting._id))}
-                      className={`px-3 py-1 ${theme.button} text-white rounded-md text-sm`}
-                    >
-                      View Details
-                    </button>
+                    />
+                    <div className="absolute top-2 right-2 flex space-x-1">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleFavorite(painting._id); }}
+                        className="p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 text-red-500 transition-all duration-200 shadow-md transform hover:scale-110"
+                      >
+                        {isFavorite(painting._id) ? (
+                          <HeartIconSolid className="w-5 h-5" />
+                        ) : (
+                          <HeartIcon className="w-5 h-5" />
+                        )}
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleComparisonPainting(painting); }}
+                        className={`p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-md transform hover:scale-110 ${
+                          isInComparison(painting._id) ? "text-indigo-600" : "text-gray-600"
+                        }`}
+                      >
+                        <ArrowsRightLeftIcon className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex-grow">
+                    <h2 className="text-lg md:text-xl font-bold mb-1">{painting.title}</h2>
+                    <div className="grid grid-cols-2 gap-2 mb-2">
+                      <p className={`text-sm ${theme.secondary}`}>
+                        <strong>Medium:</strong> {painting.medium}
+                      </p>
+                      <p className={`text-sm ${theme.secondary}`}>
+                        <strong>Dimensions:</strong> {painting.dimensions}
+                      </p>
+                    </div>
+                    <p className={`text-sm ${theme.secondary} mb-2`}>
+                      <strong>Notes:</strong> {painting.notes}
+                    </p>
+                    <div className="flex justify-between items-center">
+                      <p className="text-lg font-semibold">
+                        <strong>Price:</strong> {painting.price}
+                      </p>
+                      <button 
+                        onClick={() => openModal(filteredPaintings.findIndex(p => p._id === painting._id))}
+                        className={`px-3 py-1 ${theme.button} text-white rounded-md text-sm`}
+                      >
+                        View Details
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
       )}
 
@@ -1186,20 +1214,18 @@ const PaintingLibrary = () => {
                       <div 
                         className="relative h-[30vh] sm:h-[40vh] md:h-[60vh] flex items-center justify-center bg-black bg-opacity-20 rounded-lg overflow-hidden"
                         onMouseDown={handleMouseDown}
-                        onTouchStart={handleMouseDown}
                       >
-                        {selectedPainting && (
+                        {selectedPainting?.image && (
                           <img
                             ref={modalImageRef}
-                            src={getPaintingProperty(selectedPainting, 'image', '/placeholder-image.jpg')}
-                            alt={getPaintingProperty(selectedPainting, 'title', 'Artwork')}
+                            src={selectedPainting.image}
+                            alt={selectedPainting.title || 'Artwork'}
                             className="max-w-full max-h-full object-contain transition-transform duration-100"
                             style={{ transform: `scale(${zoomLevel})` }}
                             draggable="false"
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = '/placeholder-image.jpg';
-                              console.error('Error loading painting image');
+                              e.target.src = 'https://via.placeholder.com/400x300?text=Image+Error';
                             }}
                           />
                         )}
@@ -1371,6 +1397,20 @@ const PaintingLibrary = () => {
       )}
       </AnimatePresence>
     </div>
+  ), 
+  // Fallback UI if rendering fails
+  <div className="min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
+    <div className="bg-white p-6 rounded-lg shadow-md max-w-md w-full">
+      <h2 className="text-xl font-bold text-red-600 mb-4">Unable to display gallery</h2>
+      <p className="text-gray-700 mb-6">We encountered an error while loading the collection. Please try refreshing the page.</p>
+      <button 
+        onClick={() => window.location.reload()}
+        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+      >
+        Reload Page
+      </button>
+    </div>
+  </div>
   );
 };
 
