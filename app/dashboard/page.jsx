@@ -92,7 +92,15 @@ const Dashboard = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size on client side before attempting upload
+      const maxSize = 30 * 1024 * 1024; // 30MB in bytes
+      if (file.size > maxSize) {
+        setUploadError(`File too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). Maximum size is 30MB.`);
+        return;
+      }
+      
       setSelectedFile(file);
+      setUploadError(null);
     }
   };
   
@@ -110,13 +118,20 @@ const Dashboard = () => {
       const formData = new FormData();
       formData.append('file', selectedFile);
       
+      // Use larger timeout for big files
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+      
       const response = await fetch('/api/upload', {
         method: 'POST',
         headers: {
           'x-is-logged-in': 'true'
         },
-        body: formData
+        body: formData,
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -134,7 +149,11 @@ const Dashboard = () => {
       setSelectedFile(null);
       return data.url;
     } catch (err) {
-      setUploadError(err.message);
+      if (err.name === 'AbortError') {
+        setUploadError('Upload timed out. The file may be too large or your connection is slow.');
+      } else {
+        setUploadError(err.message);
+      }
       return null;
     } finally {
       setUploading(false);
@@ -495,55 +514,81 @@ const Dashboard = () => {
                   ></textarea>
                 </div>
                 
-                <div>
-                  <label className="block mb-1">Image</label>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Image</label>
                   
-                  {formData.image && (
+                  {formData.image ? (
                     <div className="mb-2">
-                      <Image 
+                      <img 
                         src={formData.image} 
                         alt="Painting preview" 
-                        width={200}
-                        height={150}
-                        className="border rounded mb-2"
+                        className="h-40 object-contain border rounded" 
                       />
                     </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 mb-2">
+                      Please upload an image or provide an image URL
+                    </p>
                   )}
                   
-                  <div className="flex items-center space-x-4">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/jpg"
-                      onChange={handleFileChange}
-                      className="border p-2 rounded"
+                      type="text"
+                      placeholder="Image URL (optional if uploading)"
+                      className="flex-1 p-2 border border-gray-300 rounded text-sm"
+                      name="image"
+                      value={formData.image}
+                      onChange={handleInputChange}
                     />
                     
-                    <button
-                      type="button"
-                      onClick={handleImageUpload}
-                      disabled={!selectedFile || uploading}
-                      className={`px-3 py-1 rounded ${
-                        !selectedFile || uploading
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-blue-500 text-white hover:bg-blue-600'
-                      }`}
-                    >
-                      {uploading ? 'Uploading...' : 'Upload'}
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <label className="relative cursor-pointer bg-white border border-gray-300 rounded px-3 py-2 text-sm">
+                        <span>{selectedFile ? selectedFile.name.substring(0, 20) + (selectedFile.name.length > 20 ? '...' : '') : 'Choose File'}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleFileChange}
+                        />
+                      </label>
+                      
+                      <button
+                        type="button"
+                        className={`px-3 py-2 ${
+                          !selectedFile || uploading
+                            ? 'bg-gray-300 text-gray-500'
+                            : 'bg-blue-500 text-white hover:bg-blue-600'
+                        } rounded text-sm flex items-center justify-center min-w-[80px]`}
+                        onClick={handleImageUpload}
+                        disabled={!selectedFile || uploading}
+                      >
+                        {uploading ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Uploading...
+                          </>
+                        ) : 'Upload'}
+                      </button>
+                    </div>
                   </div>
-                  
-                  <p className="text-gray-500 text-sm mt-1">
-                    Supported formats: JPEG, JPG, PNG. Maximum size: 30MB
-                  </p>
                   
                   {uploadError && (
                     <p className="text-red-500 text-sm mt-1">{uploadError}</p>
                   )}
                   
-                  {!formData.image && !selectedFile && (
-                    <p className="text-red-500 text-sm mt-1">
-                      Please upload an image or provide an image URL
+                  {selectedFile && !uploadError && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Size: {(selectedFile.size / (1024 * 1024)).toFixed(2)}MB
                     </p>
+                  )}
+                  
+                  {uploading && (
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                      <div className="bg-blue-600 h-2.5 rounded-full animate-pulse"></div>
+                    </div>
                   )}
                 </div>
                 
