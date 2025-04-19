@@ -67,7 +67,9 @@ const HomePage = () => {
                 z-50
                 drop-shadow
                 mb-0
-                md:mb-2
+                md:mb-[-60px]
+                pb-3
+                overflow-visible
               "
             >
               Paintings
