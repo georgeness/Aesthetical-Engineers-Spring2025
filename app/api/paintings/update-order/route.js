@@ -22,6 +22,10 @@ export async function PATCH(request) {
     
     // Update each painting's order
     const updateOperations = data.map(item => {
+      if (!item.id || typeof item.order !== 'number') {
+        throw new Error(`Invalid order data: ${JSON.stringify(item)}`);
+      }
+      
       return Painting.findByIdAndUpdate(
         item.id,
         { order: item.order },
@@ -29,11 +33,20 @@ export async function PATCH(request) {
       );
     });
     
-    await Promise.all(updateOperations);
+    // Execute all updates
+    const results = await Promise.all(updateOperations);
     
-    return NextResponse.json({ message: "Painting orders updated successfully" }, { status: 200 });
+    // Verify all updates were successful
+    if (results.some(result => !result)) {
+      throw new Error("Some painting orders could not be updated");
+    }
+    
+    return NextResponse.json({
+      message: "Painting orders updated successfully",
+      updatedPaintings: results.map(p => ({ id: p._id, order: p.order }))
+    }, { status: 200 });
   } catch (error) {
     console.error("Error updating painting orders:", error);
-    return NextResponse.json({ error: "Failed to update painting orders" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Failed to update painting orders" }, { status: 500 });
   }
 } 

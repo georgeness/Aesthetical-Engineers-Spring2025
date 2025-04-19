@@ -7,6 +7,7 @@ export async function GET(request) {
   try {
     await connectToDB();
     
+    // Always sort by order first (ascending), then by creation date (descending)
     const paintings = await Painting.find({}).sort({ order: 1, createdAt: -1 });
     
     return NextResponse.json(paintings, { status: 200 });
@@ -38,14 +39,14 @@ export async function POST(request) {
       }
     }
     
-    // Find the maximum order value and add 1 for the new painting
-    const maxOrderPainting = await Painting.findOne().sort({ order: -1 });
-    const newOrder = maxOrderPainting ? maxOrderPainting.order + 1 : 0;
+    // Instead of adding to the end, shift all paintings down and place new one at top
+    // Increment all existing paintings' order values by 1
+    await Painting.updateMany({}, { $inc: { order: 1 } });
     
-    // Create new painting with order
+    // Create new painting with order 0 (will appear at the top)
     const newPainting = new Painting({
       ...data,
-      order: newOrder
+      order: 0
     });
     
     await newPainting.save();

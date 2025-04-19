@@ -1397,21 +1397,21 @@ const PaintingLibrary = () => {
       )}
       </AnimatePresence>
     </div>
-  ), 
-  // Fallback UI if rendering fails
-  <div className="min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
-    <div className="bg-white p-6 rounded-lg shadow-md max-w-md w-full">
-      <h2 className="text-xl font-bold text-red-600 mb-4">Unable to display gallery</h2>
-      <p className="text-gray-700 mb-6">We encountered an error while loading the collection. Please try refreshing the page.</p>
-      <button 
-        onClick={() => window.location.reload()}
-        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-      >
-        Reload Page
-      </button>
+  ), (
+    // Fallback UI if rendering fails
+    <div className="min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
+      <div className="bg-white p-6 rounded-lg shadow-md max-w-md w-full">
+        <h2 className="text-xl font-bold text-red-600 mb-4">Unable to display gallery</h2>
+        <p className="text-gray-700 mb-6">We encountered an error while loading the collection. Please try refreshing the page.</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Reload Page
+        </button>
+      </div>
     </div>
-  </div>
-  );
+  ));
 };
 
 export default PaintingLibrary;

@@ -22,7 +22,8 @@ const Dashboard = () => {
     medium: '',
     notes: '',
     price: '',
-    image: ''
+    image: '',
+    order: 0
   });
   
   // Image upload state
@@ -67,6 +68,9 @@ const Dashboard = () => {
           }
           return painting;
         });
+        
+        // Sort paintings by order value
+        withOrder.sort((a, b) => a.order - b.order);
         
         setPaintings(withOrder);
       } catch (err) {
@@ -216,7 +220,8 @@ const Dashboard = () => {
         medium: '',
         notes: '',
         price: '',
-        image: ''
+        image: '',
+        order: 0
       });
       setSelectedFile(null);
       setShowAddForm(false);
@@ -235,7 +240,8 @@ const Dashboard = () => {
       medium: painting.medium,
       notes: painting.notes || '',
       price: painting.price,
-      image: painting.image
+      image: painting.image,
+      order: painting.order
     });
     setEditingPainting(painting);
     setShowAddForm(true);
@@ -294,6 +300,7 @@ const Dashboard = () => {
     [updatedPaintings[index], updatedPaintings[index - 1]] = 
       [updatedPaintings[index - 1], updatedPaintings[index]];
     
+    // Update local state immediately for responsive UI
     setPaintings(updatedPaintings);
     
     // Update the orders in the database
@@ -337,6 +344,7 @@ const Dashboard = () => {
     [updatedPaintings[index], updatedPaintings[index + 1]] = 
       [updatedPaintings[index + 1], updatedPaintings[index]];
     
+    // Update local state immediately for responsive UI
     setPaintings(updatedPaintings);
     
     // Update the orders in the database
@@ -361,6 +369,43 @@ const Dashboard = () => {
       setError(err.message);
       // Revert the local change if API call fails
       setPaintings([...paintings]);
+    }
+  };
+
+  // Function to normalize all painting orders in the database
+  const normalizeOrders = async () => {
+    try {
+      // Sort paintings by current order
+      const sortedPaintings = [...paintings].sort((a, b) => a.order - b.order);
+      
+      // Assign sequential order values (0, 1, 2, ...)
+      const orderUpdates = sortedPaintings.map((painting, index) => ({
+        id: painting._id,
+        order: index
+      }));
+      
+      // Update all paintings with normalized order values
+      const response = await fetch('/api/paintings/update-order', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(orderUpdates)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to normalize painting orders');
+      }
+      
+      // Update local state with normalized order values
+      const updatedPaintings = sortedPaintings.map((painting, index) => ({
+        ...painting,
+        order: index
+      }));
+      
+      setPaintings(updatedPaintings);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -441,7 +486,8 @@ const Dashboard = () => {
                       medium: '',
                       notes: '',
                       price: '',
-                      image: ''
+                      image: '',
+                      order: 0
                     });
                   }}
                 >
@@ -608,17 +654,31 @@ const Dashboard = () => {
           {/* Paintings management */}
           {activeTab === 'paintings' && (
             <div>
-              <div className="flex justify-between mb-4">
-                <h2 className="text-xl font-bold">Manage Paintings</h2>
-                <button
-                  onClick={() => {
-                    setShowAddForm(true);
-                    setEditingPainting(null);
-                  }}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                  Add New Painting
-                </button>
+              <div className="mb-4 flex justify-between items-center">
+                <h2 className="text-lg font-bold">All Paintings</h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setShowAddForm(true);
+                      setEditingPainting(null);
+                      setFormData({
+                        title: '',
+                        dimensions: '',
+                        medium: '',
+                        notes: '',
+                        price: '',
+                        image: '',
+                        order: 0
+                      });
+                    }}
+                    className="flex items-center text-blue-600 hover:text-blue-800"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                    </svg>
+                    Add Painting
+                  </button>
+                </div>
               </div>
               
               {loading ? (

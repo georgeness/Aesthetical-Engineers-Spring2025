@@ -38,6 +38,11 @@ export async function PATCH(request, { params }) {
     
     const data = await request.json();
     
+    // Make sure order is a number if provided
+    if (data.order !== undefined && typeof data.order !== 'number') {
+      data.order = parseInt(data.order, 10) || 0; // Convert to number or default to 0
+    }
+    
     // Update the painting
     const updatedPainting = await Painting.findByIdAndUpdate(
       id,
