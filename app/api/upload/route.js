@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 // Configure the route to allow larger uploads using the new format
 export const dynamic = 'force-dynamic';
-export const maxDuration = 90; // Increase to 90 seconds for very large uploads
+export const maxDuration = 60; // Maximum allowed for Vercel hobby plan
 export const fetchCache = 'force-no-store';
 export const revalidate = 0;
 
