@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
 
+// Configure the route to allow larger uploads using the new format
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // Allow up to 60 seconds for large uploads
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+
 // POST - Handle image upload
 export async function POST(request) {
   try {
@@ -35,15 +41,15 @@ export async function POST(request) {
     const validTypes = ["image/jpeg", "image/png", "image/jpg"];
     if (!validTypes.includes(file.type)) {
       return NextResponse.json({ 
-        error: "Invalid file type. Only JPEG and PNG images are allowed" 
+        error: "Invalid file type. Only JPEG, JPG and PNG images are allowed" 
       }, { status: 400 });
     }
     
-    // Validate file size (limit to 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    // Validate file size (limit to 30MB)
+    const maxSize = 30 * 1024 * 1024; // 30MB in bytes
     if (file.size > maxSize) {
       return NextResponse.json({ 
-        error: "File too large. Maximum size is 5MB" 
+        error: "File too large. Maximum size is 30MB" 
       }, { status: 400 });
     }
     

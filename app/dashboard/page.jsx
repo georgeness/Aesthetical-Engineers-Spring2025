@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 
 const Dashboard = () => {
   const router = useRouter();
@@ -58,7 +59,16 @@ const Dashboard = () => {
         }
         
         const data = await response.json();
-        setPaintings(data);
+        
+        // If new paintings have no order, assign them increasing order values
+        const withOrder = data.map((painting, index) => {
+          if (painting.order === undefined || painting.order === null) {
+            return { ...painting, order: index };
+          }
+          return painting;
+        });
+        
+        setPaintings(withOrder);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -249,6 +259,92 @@ const Dashboard = () => {
     router.push('/login');
   };
 
+  // Handle moving a painting up
+  const handleMoveUp = async (index) => {
+    if (index === 0) return; // Already at the top
+    
+    const updatedPaintings = [...paintings];
+    // Swap the orders
+    const currentOrder = updatedPaintings[index].order;
+    const aboveOrder = updatedPaintings[index - 1].order;
+    
+    updatedPaintings[index].order = aboveOrder;
+    updatedPaintings[index - 1].order = currentOrder;
+    
+    // Swap positions in the array
+    [updatedPaintings[index], updatedPaintings[index - 1]] = 
+      [updatedPaintings[index - 1], updatedPaintings[index]];
+    
+    setPaintings(updatedPaintings);
+    
+    // Update the orders in the database
+    try {
+      const orderUpdates = [
+        { id: updatedPaintings[index - 1]._id, order: updatedPaintings[index - 1].order },
+        { id: updatedPaintings[index]._id, order: updatedPaintings[index].order }
+      ];
+      
+      const response = await fetch('/api/paintings/update-order', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(orderUpdates)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update painting order');
+      }
+    } catch (err) {
+      setError(err.message);
+      // Revert the local change if API call fails
+      setPaintings([...paintings]);
+    }
+  };
+  
+  // Handle moving a painting down
+  const handleMoveDown = async (index) => {
+    if (index === paintings.length - 1) return; // Already at the bottom
+    
+    const updatedPaintings = [...paintings];
+    // Swap the orders
+    const currentOrder = updatedPaintings[index].order;
+    const belowOrder = updatedPaintings[index + 1].order;
+    
+    updatedPaintings[index].order = belowOrder;
+    updatedPaintings[index + 1].order = currentOrder;
+    
+    // Swap positions in the array
+    [updatedPaintings[index], updatedPaintings[index + 1]] = 
+      [updatedPaintings[index + 1], updatedPaintings[index]];
+    
+    setPaintings(updatedPaintings);
+    
+    // Update the orders in the database
+    try {
+      const orderUpdates = [
+        { id: updatedPaintings[index]._id, order: updatedPaintings[index].order },
+        { id: updatedPaintings[index + 1]._id, order: updatedPaintings[index + 1].order }
+      ];
+      
+      const response = await fetch('/api/paintings/update-order', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(orderUpdates)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update painting order');
+      }
+    } catch (err) {
+      setError(err.message);
+      // Revert the local change if API call fails
+      setPaintings([...paintings]);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-7xl mx-auto">
@@ -436,6 +532,10 @@ const Dashboard = () => {
                     </button>
                   </div>
                   
+                  <p className="text-gray-500 text-sm mt-1">
+                    Supported formats: JPEG, JPG, PNG. Maximum size: 30MB
+                  </p>
+                  
                   {uploadError && (
                     <p className="text-red-500 text-sm mt-1">{uploadError}</p>
                   )}
@@ -494,11 +594,12 @@ const Dashboard = () => {
                         <th className="px-4 py-2 text-left">Medium</th>
                         <th className="px-4 py-2 text-left">Dimensions</th>
                         <th className="px-4 py-2 text-left">Price</th>
+                        <th className="px-4 py-2 text-center">Order</th>
                         <th className="px-4 py-2 text-center">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {paintings.map((painting) => (
+                      {paintings.map((painting, index) => (
                         <tr key={painting._id} className="border-t hover:bg-gray-50">
                           <td className="px-4 py-2">
                             <Image 
@@ -513,6 +614,34 @@ const Dashboard = () => {
                           <td className="px-4 py-2">{painting.medium}</td>
                           <td className="px-4 py-2">{painting.dimensions}</td>
                           <td className="px-4 py-2">{painting.price}</td>
+                          <td className="px-4 py-2 text-center">
+                            <div className="flex flex-col items-center">
+                              <button
+                                onClick={() => handleMoveUp(index)}
+                                disabled={index === 0}
+                                className={`p-1 mb-1 rounded ${
+                                  index === 0 
+                                    ? 'text-gray-400 cursor-not-allowed' 
+                                    : 'text-blue-600 hover:bg-blue-100'
+                                }`}
+                                title="Move Up"
+                              >
+                                <ChevronUpIcon className="h-5 w-5" />
+                              </button>
+                              <button
+                                onClick={() => handleMoveDown(index)}
+                                disabled={index === paintings.length - 1}
+                                className={`p-1 rounded ${
+                                  index === paintings.length - 1 
+                                    ? 'text-gray-400 cursor-not-allowed' 
+                                    : 'text-blue-600 hover:bg-blue-100'
+                                }`}
+                                title="Move Down"
+                              >
+                                <ChevronDownIcon className="h-5 w-5" />
+                              </button>
+                            </div>
+                          </td>
                           <td className="px-4 py-2">
                             <div className="flex justify-center space-x-2">
                               <button

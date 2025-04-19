@@ -7,7 +7,7 @@ export async function GET(request) {
   try {
     await connectToDB();
     
-    const paintings = await Painting.find({}).sort({ createdAt: -1 });
+    const paintings = await Painting.find({}).sort({ order: 1, createdAt: -1 });
     
     return NextResponse.json(paintings, { status: 200 });
   } catch (error) {
@@ -38,8 +38,16 @@ export async function POST(request) {
       }
     }
     
-    // Create new painting
-    const newPainting = new Painting(data);
+    // Find the maximum order value and add 1 for the new painting
+    const maxOrderPainting = await Painting.findOne().sort({ order: -1 });
+    const newOrder = maxOrderPainting ? maxOrderPainting.order + 1 : 0;
+    
+    // Create new painting with order
+    const newPainting = new Painting({
+      ...data,
+      order: newOrder
+    });
+    
     await newPainting.save();
     
     return NextResponse.json(newPainting, { status: 201 });

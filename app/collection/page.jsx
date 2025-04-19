@@ -82,6 +82,26 @@ const PaintingLibrary = () => {
     }
   }, []);
 
+  // Save a transformed version of favorites that use _id instead of id to local storage
+  useEffect(() => {
+    if (paintings.length > 0 && favorites.length > 0) {
+      // Convert any old id-based favorites to _id-based favorites
+      const updatedFavorites = favorites.map(favId => {
+        // Check if this is already an _id
+        if (favId.length > 20) return favId;
+        
+        // Try to find a painting with matching id and use its _id instead
+        const painting = paintings.find(p => p.id === favId);
+        return painting ? painting._id : favId;
+      });
+      
+      localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+      if (JSON.stringify(updatedFavorites) !== JSON.stringify(favorites)) {
+        setFavorites(updatedFavorites);
+      }
+    }
+  }, [paintings, favorites]);
+
   // Save dark mode preference
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -128,10 +148,10 @@ const PaintingLibrary = () => {
 
   // Add or remove painting from comparison
   const toggleComparisonPainting = (painting) => {
-    const exists = comparisonPaintings.some(p => p.id === painting.id);
+    const exists = comparisonPaintings.some(p => p._id === painting._id);
     
     if (exists) {
-      setComparisonPaintings(prev => prev.filter(p => p.id !== painting.id));
+      setComparisonPaintings(prev => prev.filter(p => p._id !== painting._id));
     } else {
       // Only allow up to 3 paintings for comparison
       if (comparisonPaintings.length < 3) {
@@ -141,7 +161,7 @@ const PaintingLibrary = () => {
   };
 
   // Check if painting is in comparison
-  const isInComparison = (id) => comparisonPaintings.some(p => p.id === id);
+  const isInComparison = (id) => comparisonPaintings.some(p => p._id === id);
 
   // Clear all comparison paintings
   const clearComparison = () => {
@@ -200,7 +220,7 @@ const PaintingLibrary = () => {
   // Function to open modal with selected painting
   const openModal = (index) => {
     setCurrentIndex(index);
-    setSelectedPainting(paintings[index]);
+    setSelectedPainting(filteredPaintings[index]);
     setZoomLevel(1);
     imagePosition.current = { x: 0, y: 0 };
   };
@@ -213,18 +233,18 @@ const PaintingLibrary = () => {
 
   // Function to navigate to previous painting
   const prevPainting = () => {
-    const newIndex = currentIndex === 0 ? paintings.length - 1 : currentIndex - 1;
+    const newIndex = currentIndex === 0 ? filteredPaintings.length - 1 : currentIndex - 1;
     setCurrentIndex(newIndex);
-    setSelectedPainting(paintings[newIndex]);
+    setSelectedPainting(filteredPaintings[newIndex]);
     setZoomLevel(1);
     imagePosition.current = { x: 0, y: 0 };
   };
 
   // Function to navigate to next painting
   const nextPainting = () => {
-    const newIndex = currentIndex === paintings.length - 1 ? 0 : currentIndex + 1;
+    const newIndex = currentIndex === filteredPaintings.length - 1 ? 0 : currentIndex + 1;
     setCurrentIndex(newIndex);
-    setSelectedPainting(paintings[newIndex]);
+    setSelectedPainting(filteredPaintings[newIndex]);
     setZoomLevel(1);
     imagePosition.current = { x: 0, y: 0 };
   };
@@ -302,7 +322,7 @@ const PaintingLibrary = () => {
     
     // Apply favorites filter
     if (showOnlyFavorites) {
-      result = result.filter(p => favorites.includes(p.id));
+      result = result.filter(p => favorites.includes(p._id));
     }
     
     // Apply sorting
@@ -614,7 +634,7 @@ const PaintingLibrary = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {comparisonPaintings.map((painting) => (
-                <div key={painting.id} className={`relative rounded-lg overflow-hidden border ${theme.border}`}>
+                <div key={painting._id} className={`relative rounded-lg overflow-hidden border ${theme.border}`}>
                   <img 
                     src={painting.image} 
                     alt={painting.title} 
@@ -661,7 +681,7 @@ const PaintingLibrary = () => {
                   <tr>
                     <th className="p-3 text-left">Feature</th>
                     {comparisonPaintings.map(painting => (
-                      <th key={painting.id} className="p-3 text-left">{painting.title}</th>
+                      <th key={painting._id} className="p-3 text-left">{painting.title}</th>
                     ))}
                   </tr>
                 </thead>
@@ -669,25 +689,25 @@ const PaintingLibrary = () => {
                   <tr className={darkMode ? "border-t border-gray-600" : "border-t border-gray-200"}>
                     <td className="p-3"><strong>Medium</strong></td>
                     {comparisonPaintings.map(painting => (
-                      <td key={painting.id} className="p-3">{painting.medium}</td>
+                      <td key={painting._id} className="p-3">{painting.medium}</td>
                     ))}
                   </tr>
                   <tr className={darkMode ? "border-t border-gray-600" : "border-t border-gray-200"}>
                     <td className="p-3"><strong>Dimensions</strong></td>
                     {comparisonPaintings.map(painting => (
-                      <td key={painting.id} className="p-3">{painting.dimensions}</td>
+                      <td key={painting._id} className="p-3">{painting.dimensions}</td>
                     ))}
                   </tr>
                   <tr className={darkMode ? "border-t border-gray-600" : "border-t border-gray-200"}>
                     <td className="p-3"><strong>Price</strong></td>
                     {comparisonPaintings.map(painting => (
-                      <td key={painting.id} className="p-3">{painting.price}</td>
+                      <td key={painting._id} className="p-3">{painting.price}</td>
                     ))}
                   </tr>
                   <tr className={darkMode ? "border-t border-gray-600" : "border-t border-gray-200"}>
                     <td className="p-3"><strong>Notes</strong></td>
                     {comparisonPaintings.map(painting => (
-                      <td key={painting.id} className="p-3">{painting.notes}</td>
+                      <td key={painting._id} className="p-3">{painting.notes}</td>
                     ))}
                   </tr>
                 </tbody>
@@ -742,19 +762,19 @@ const PaintingLibrary = () => {
             <div className="flex flex-wrap gap-4 justify-center items-center h-full overflow-auto p-4">
               {filteredPaintings.map((painting, index) => {
                 // Calculate varied sizes - larger for featured works
-                const isFeatured = isFavorite(painting.id) || index % 5 === 0;
+                const isFeatured = isFavorite(painting._id) || index % 5 === 0;
                 const width = isFeatured ? `${Math.max(220, Math.min(320, 240 + (index % 4) * 20))}px` : `${180 + (index % 3) * 15}px`;
                 const angle = Math.random() * 4 - 2; // Random slight tilt -2 to 2 degrees
                 
                 return (
                   <motion.div
-                    key={painting.id}
+                    key={painting._id}
                     className="relative group cursor-pointer"
                     style={{ 
                       width,
                       perspective: '1000px',
                       transformStyle: 'preserve-3d',
-                      zIndex: selectedPainting?.id === painting.id ? 50 : 1,
+                      zIndex: selectedPainting?._id === painting._id ? 50 : 1,
                     }}
                     whileHover={{ 
                       scale: 1.02, 
@@ -769,7 +789,7 @@ const PaintingLibrary = () => {
                       rotateZ: angle,
                       transition: { delay: index * 0.04, duration: 0.5 }
                     }}
-                    onClick={() => openModal(paintings.findIndex(p => p.id === painting.id))}
+                    onClick={() => openModal(filteredPaintings.findIndex(p => p._id === painting._id))}
                   >
                     {/* Frame and matting effect */}
                     <div 
@@ -809,7 +829,7 @@ const PaintingLibrary = () => {
                       </div>
                       
                       {/* Favorite indicator */}
-                      {isFavorite(painting.id) && (
+                      {isFavorite(painting._id) && (
                         <div className="absolute top-2 right-2 z-10">
                           <HeartIconSolid className="w-4 h-4 text-red-500" />
                         </div>
@@ -828,7 +848,7 @@ const PaintingLibrary = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 w-full max-w-7xl px-4">
           {filteredPaintings.map((painting, index) => (
             <motion.div
-              key={painting.id}
+              key={painting._id}
               className={`${theme.card} p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden`}
               whileHover={{ y: -5 }}
               initial={{ opacity: 0, y: 20 }}
@@ -840,14 +860,14 @@ const PaintingLibrary = () => {
               src={painting.image}
               alt={painting.title}
                   className="w-full h-auto mb-4 rounded cursor-pointer transform transition duration-300 group-hover:brightness-90"
-                  onClick={() => openModal(paintings.findIndex(p => p.id === painting.id))}
+                  onClick={() => openModal(filteredPaintings.findIndex(p => p._id === painting._id))}
                 />
                 <div className="absolute top-2 right-2 flex space-x-1">
                   <button
-                    onClick={(e) => { e.stopPropagation(); toggleFavorite(painting.id); }}
+                    onClick={(e) => { e.stopPropagation(); toggleFavorite(painting._id); }}
                     className="p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 text-red-500 transition-all duration-200 shadow-md transform hover:scale-110"
                   >
-                    {isFavorite(painting.id) ? (
+                    {isFavorite(painting._id) ? (
                       <HeartIconSolid className="w-5 h-5" />
                     ) : (
                       <HeartIcon className="w-5 h-5" />
@@ -856,7 +876,7 @@ const PaintingLibrary = () => {
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleComparisonPainting(painting); }}
                     className={`p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-md transform hover:scale-110 ${
-                      isInComparison(painting.id) ? "text-indigo-600" : "text-gray-600"
+                      isInComparison(painting._id) ? "text-indigo-600" : "text-gray-600"
                     }`}
                   >
                     <ArrowsRightLeftIcon className="w-5 h-5" />
@@ -883,7 +903,7 @@ const PaintingLibrary = () => {
         <div className="w-full max-w-7xl px-4">
           {filteredPaintings.map((painting, index) => (
             <motion.div
-              key={painting.id}
+              key={painting._id}
               className={`${theme.card} p-4 mb-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -895,14 +915,14 @@ const PaintingLibrary = () => {
                     src={painting.image}
                     alt={painting.title}
                     className="w-full h-full object-cover rounded cursor-pointer"
-                    onClick={() => openModal(paintings.findIndex(p => p.id === painting.id))}
+                    onClick={() => openModal(filteredPaintings.findIndex(p => p._id === painting._id))}
                   />
                   <div className="absolute top-2 right-2 flex space-x-1">
                     <button
-                      onClick={(e) => { e.stopPropagation(); toggleFavorite(painting.id); }}
+                      onClick={(e) => { e.stopPropagation(); toggleFavorite(painting._id); }}
                       className="p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 text-red-500 transition-all duration-200 shadow-md transform hover:scale-110"
                     >
-                      {isFavorite(painting.id) ? (
+                      {isFavorite(painting._id) ? (
                         <HeartIconSolid className="w-5 h-5" />
                       ) : (
                         <HeartIcon className="w-5 h-5" />
@@ -911,7 +931,7 @@ const PaintingLibrary = () => {
                     <button
                       onClick={(e) => { e.stopPropagation(); toggleComparisonPainting(painting); }}
                       className={`p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-md transform hover:scale-110 ${
-                        isInComparison(painting.id) ? "text-indigo-600" : "text-gray-600"
+                        isInComparison(painting._id) ? "text-indigo-600" : "text-gray-600"
                       }`}
                     >
                       <ArrowsRightLeftIcon className="w-5 h-5" />
@@ -936,7 +956,7 @@ const PaintingLibrary = () => {
               <strong>Price:</strong> {painting.price}
             </p>
                     <button 
-                      onClick={() => openModal(paintings.findIndex(p => p.id === painting.id))}
+                      onClick={() => openModal(filteredPaintings.findIndex(p => p._id === painting._id))}
                       className={`px-3 py-1 ${theme.button} text-white rounded-md text-sm`}
                     >
                       View Details
@@ -1128,16 +1148,16 @@ const PaintingLibrary = () => {
                   <div className="mt-auto space-y-2 sm:space-y-3">
                     <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       <button
-                        onClick={() => toggleFavorite(selectedPainting.id)}
+                        onClick={() => toggleFavorite(selectedPainting._id)}
                         className={`py-2 sm:py-3 rounded-lg flex items-center justify-center gap-1 sm:gap-2 transition text-sm sm:text-base ${
-                          isFavorite(selectedPainting.id)
+                          isFavorite(selectedPainting._id)
                             ? "bg-red-600 text-white hover:bg-red-700"
                             : darkMode 
                               ? "bg-gray-700 text-white hover:bg-gray-600" 
                               : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                         }`}
                       >
-                        {isFavorite(selectedPainting.id) ? (
+                        {isFavorite(selectedPainting._id) ? (
                           <>
                             <HeartIconSolid className="w-4 h-4 sm:w-5 sm:h-5" />
                             <span>Remove</span>
@@ -1153,7 +1173,7 @@ const PaintingLibrary = () => {
                       <button
                         onClick={() => toggleComparisonPainting(selectedPainting)}
                         className={`py-2 sm:py-3 rounded-lg flex items-center justify-center gap-1 sm:gap-2 transition text-sm sm:text-base ${
-                          isInComparison(selectedPainting.id)
+                          isInComparison(selectedPainting._id)
                             ? "bg-indigo-600 text-white hover:bg-indigo-700"
                             : darkMode 
                               ? "bg-gray-700 text-white hover:bg-gray-600" 
@@ -1161,7 +1181,7 @@ const PaintingLibrary = () => {
                         }`}
                       >
                         <ArrowsRightLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span>{isInComparison(selectedPainting.id) ? "Remove" : "Compare"}</span>
+                        <span>{isInComparison(selectedPainting._id) ? "Remove" : "Compare"}</span>
                       </button>
                     </div>
                     
