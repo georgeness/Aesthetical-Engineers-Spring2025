@@ -7,9 +7,6 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 90; // Increase to 90 seconds for very large uploads
 export const fetchCache = 'force-no-store';
 export const revalidate = 0;
-export const bodyParser = {
-  sizeLimit: '32mb' // Set Next.js body parser limit slightly higher than our actual limit
-};
 
 // POST - Handle image upload
 export async function POST(request) {
