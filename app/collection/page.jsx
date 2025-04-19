@@ -20,7 +20,10 @@ import {
 } from "@heroicons/react/24/solid";
 
 const PaintingLibrary = () => {
+  // All state hooks must be declared first, in a consistent order
   // State for UI controls
+  const [isMounted, setIsMounted] = useState(false);
+  const [mobileError, setMobileError] = useState(null);
   const [selectedPainting, setSelectedPainting] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [viewMode, setViewMode] = useState("grid"); // "grid", "list", or "wall"
@@ -44,13 +47,31 @@ const PaintingLibrary = () => {
   const [comparisonPaintings, setComparisonPaintings] = useState([]);
   const [paintings, setPaintings] = useState([]);
   
-  // Refs
+  // All refs must be declared after state hooks
   const modalImageRef = useRef(null);
   const startPos = useRef({ x: 0, y: 0 });
   const imagePosition = useRef({ x: 0, y: 0 });
   const dragItem = useRef(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+
+  // Add error handling useEffect
+  useEffect(() => {
+    setIsMounted(true);
+    
+    // Setup global error handler to catch client-side errors
+    const handleError = (event) => {
+      console.error('Caught client error:', event.error);
+      setMobileError(event.error?.message || 'Unknown error occurred');
+      event.preventDefault(); // Prevent default error handling
+    };
+    
+    window.addEventListener('error', handleError);
+    
+    return () => {
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
 
   // Load favorites on mount
   useEffect(() => {
@@ -72,9 +93,13 @@ const PaintingLibrary = () => {
           // If no paintings are returned from API, use sample data
           if (data && data.length > 0) {
             setPaintings(data);
+          } else {
+            console.warn('No paintings returned from API');
+            setPaintings([]);
           }
         } catch (error) {
           console.error('Error fetching paintings:', error);
+          setMobileError('Failed to load paintings. Please try again.');
         }
       };
       
@@ -139,6 +164,39 @@ const PaintingLibrary = () => {
     }
   }, [isARMode]);
 
+  // Early return for SSR/hydration safety
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-gray-100">
+        <div className="p-6 bg-white rounded-lg shadow-md max-w-md w-full">
+          <div className="w-12 h-12 border-4 border-t-transparent border-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-center text-gray-700">Loading collection...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error handling UI
+  if (mobileError) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
+        <div className="p-6 bg-white rounded-lg shadow-md max-w-md w-full">
+          <h2 className="text-xl font-bold text-red-600 mb-4">Something went wrong</h2>
+          <p className="text-gray-700 mb-4">We encountered an error while loading the collection.</p>
+          <p className="text-sm text-gray-500 mb-6">{mobileError}</p>
+          <div className="flex justify-center">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Toggle AR mode
   const toggleARMode = () => {
     if (selectedPainting) {
@@ -146,8 +204,16 @@ const PaintingLibrary = () => {
     }
   };
 
+  // Add safe access for painting data
+  const getPaintingProperty = (painting, property, defaultValue = '') => {
+    if (!painting) return defaultValue;
+    return painting[property] || defaultValue;
+  };
+
   // Add or remove painting from comparison
   const toggleComparisonPainting = (painting) => {
+    if (!painting || !painting._id) return;
+    
     const exists = comparisonPaintings.some(p => p._id === painting._id);
     
     if (exists) {
@@ -161,7 +227,10 @@ const PaintingLibrary = () => {
   };
 
   // Check if painting is in comparison
-  const isInComparison = (id) => comparisonPaintings.some(p => p._id === id);
+  const isInComparison = (id) => {
+    if (!id) return false;
+    return comparisonPaintings.some(p => p._id === id);
+  };
 
   // Clear all comparison paintings
   const clearComparison = () => {
@@ -181,23 +250,29 @@ const PaintingLibrary = () => {
 
   // Share painting
   const sharePainting = (painting) => {
-    if (navigator.share) {
-      navigator.share({
-        title: painting.title,
-        text: `Check out this beautiful painting: ${painting.title} - ${painting.medium}`,
-        url: window.location.href
-      }).catch(err => console.error('Error sharing:', err));
-    } else {
-      // Fallback copy to clipboard
-      const shareText = `${painting.title} - ${painting.medium} - ${painting.price}`;
-      navigator.clipboard.writeText(shareText)
-        .then(() => alert('Painting details copied to clipboard!'))
-        .catch(err => console.error('Could not copy text: ', err));
+    if (!painting) return;
+    
+    try {
+      if (navigator.share) {
+        navigator.share({
+          title: painting.title || 'Artwork',
+          text: `Check out this beautiful painting: ${painting.title || 'Artwork'} - ${painting.medium || 'Mixed media'}`,
+          url: window.location.href
+        }).catch(err => console.error('Error sharing:', err));
+      } else {
+        // Fallback copy to clipboard
+        const shareText = `${painting.title || 'Artwork'} - ${painting.medium || 'Mixed media'} - ${painting.price || 'Price on request'}`;
+        navigator.clipboard.writeText(shareText)
+          .then(() => alert('Painting details copied to clipboard!'))
+          .catch(err => console.error('Could not copy text: ', err));
+      }
+    } catch (error) {
+      console.error('Error sharing painting:', error);
     }
   };
 
   // Extract unique medium types
-  const mediumTypes = ["all", ...new Set(paintings.map(p => p.medium))];
+  const mediumTypes = ["all", ...new Set(paintings.map(p => p.medium).filter(Boolean))];
 
   // Function to toggle dark mode
   const toggleDarkMode = () => {
@@ -206,23 +281,38 @@ const PaintingLibrary = () => {
 
   // Function to toggle favorites
   const toggleFavorite = (id) => {
-    const newFavorites = favorites.includes(id)
-      ? favorites.filter(favId => favId !== id)
-      : [...favorites, id];
+    if (!id) return;
     
-    setFavorites(newFavorites);
-    localStorage.setItem("favorites", JSON.stringify(newFavorites));
+    try {
+      const newFavorites = favorites.includes(id)
+        ? favorites.filter(favId => favId !== id)
+        : [...favorites, id];
+      
+      setFavorites(newFavorites);
+      localStorage.setItem("favorites", JSON.stringify(newFavorites));
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
   };
 
   // Check if painting is favorite
-  const isFavorite = (id) => favorites.includes(id);
+  const isFavorite = (id) => {
+    if (!id) return false;
+    return favorites.includes(id);
+  };
 
   // Function to open modal with selected painting
   const openModal = (index) => {
-    setCurrentIndex(index);
-    setSelectedPainting(filteredPaintings[index]);
-    setZoomLevel(1);
-    imagePosition.current = { x: 0, y: 0 };
+    if (index < 0 || index >= filteredPaintings.length) return;
+    try {
+      setCurrentIndex(index);
+      setSelectedPainting(filteredPaintings[index]);
+      setZoomLevel(1);
+      imagePosition.current = { x: 0, y: 0 };
+    } catch (error) {
+      console.error('Error opening modal:', error);
+      setMobileError('Could not open painting details. Please try again.');
+    }
   };
 
   // Function to close modal
@@ -233,6 +323,7 @@ const PaintingLibrary = () => {
 
   // Function to navigate to previous painting
   const prevPainting = () => {
+    if (!filteredPaintings.length) return;
     const newIndex = currentIndex === 0 ? filteredPaintings.length - 1 : currentIndex - 1;
     setCurrentIndex(newIndex);
     setSelectedPainting(filteredPaintings[newIndex]);
@@ -242,6 +333,7 @@ const PaintingLibrary = () => {
 
   // Function to navigate to next painting
   const nextPainting = () => {
+    if (!filteredPaintings.length) return;
     const newIndex = currentIndex === filteredPaintings.length - 1 ? 0 : currentIndex + 1;
     setCurrentIndex(newIndex);
     setSelectedPainting(filteredPaintings[newIndex]);
@@ -251,27 +343,34 @@ const PaintingLibrary = () => {
 
   // Handle mouse down for image pan
   const handleMouseDown = (e) => {
+    if (!modalImageRef.current) return;
     if (zoomLevel > 1) {
       startPos.current = {
-        x: e.clientX - imagePosition.current.x,
-        y: e.clientY - imagePosition.current.y
+        x: (e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) - imagePosition.current.x,
+        y: (e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0)) - imagePosition.current.y
       };
       
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      // Use the right events for mobile vs desktop
+      if (window.matchMedia('(pointer: coarse)').matches) {
+        document.addEventListener('touchmove', handleTouchMove);
+        document.addEventListener('touchend', handleTouchEnd);
+      } else {
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+      }
     }
   };
 
   // Handle mouse move for image pan
   const handleMouseMove = (e) => {
-    if (modalImageRef.current) {
-      imagePosition.current = {
-        x: e.clientX - startPos.current.x,
-        y: e.clientY - startPos.current.y
-      };
-      
-      modalImageRef.current.style.transform = `translate(${imagePosition.current.x}px, ${imagePosition.current.y}px) scale(${zoomLevel})`;
-    }
+    if (!modalImageRef.current) return;
+    
+    imagePosition.current = {
+      x: e.clientX - startPos.current.x,
+      y: e.clientY - startPos.current.y
+    };
+    
+    modalImageRef.current.style.transform = `translate(${imagePosition.current.x}px, ${imagePosition.current.y}px) scale(${zoomLevel})`;
   };
 
   // Handle mouse up for image pan
@@ -280,16 +379,37 @@ const PaintingLibrary = () => {
     document.removeEventListener('mouseup', handleMouseUp);
   };
 
+  // Add touch event handlers for mobile
+  const handleTouchMove = (e) => {
+    if (!modalImageRef.current || !e.touches[0]) return;
+    
+    imagePosition.current = {
+      x: e.touches[0].clientX - startPos.current.x,
+      y: e.touches[0].clientY - startPos.current.y
+    };
+    
+    modalImageRef.current.style.transform = `translate(${imagePosition.current.x}px, ${imagePosition.current.y}px) scale(${zoomLevel})`;
+  };
+
+  const handleTouchEnd = () => {
+    document.removeEventListener('touchmove', handleTouchMove);
+    document.removeEventListener('touchend', handleTouchEnd);
+  };
+
   // Handle zoom in/out
   const handleZoom = (factor) => {
-    setZoomLevel(prev => {
-      const newZoom = prev * factor;
-      // Limit zoom level between 1 and 4
-      return Math.max(1, Math.min(4, newZoom));
-    });
-    
-    if (modalImageRef.current) {
-      modalImageRef.current.style.transform = `translate(${imagePosition.current.x}px, ${imagePosition.current.y}px) scale(${zoomLevel * factor})`;
+    try {
+      setZoomLevel(prev => {
+        const newZoom = prev * factor;
+        // Limit zoom level between 1 and 4
+        return Math.max(1, Math.min(4, newZoom));
+      });
+      
+      if (modalImageRef.current) {
+        modalImageRef.current.style.transform = `translate(${imagePosition.current.x}px, ${imagePosition.current.y}px) scale(${zoomLevel * factor})`;
+      }
+    } catch (error) {
+      console.error('Error handling zoom:', error);
     }
   };
 
@@ -309,32 +429,32 @@ const PaintingLibrary = () => {
     // Apply search filter
     if (searchTerm) {
       result = result.filter(p => 
-        p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.notes.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.medium.toLowerCase().includes(searchTerm.toLowerCase())
+        (p?.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (p?.notes?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (p?.medium?.toLowerCase() || '').includes(searchTerm.toLowerCase())
       );
     }
     
     // Apply medium filter
     if (filterMedium !== "all") {
-      result = result.filter(p => p.medium === filterMedium);
+      result = result.filter(p => p?.medium === filterMedium);
     }
     
     // Apply favorites filter
     if (showOnlyFavorites) {
-      result = result.filter(p => favorites.includes(p._id));
+      result = result.filter(p => favorites.includes(p?._id));
     }
     
     // Apply sorting
     switch (sortOption) {
       case "priceAsc":
-        result.sort((a, b) => parseInt(a.price.replace(/\D/g, '')) - parseInt(b.price.replace(/\D/g, '')));
+        result.sort((a, b) => parseInt((a?.price || '').replace(/\D/g, '') || '0') - parseInt((b?.price || '').replace(/\D/g, '') || '0'));
         break;
       case "priceDesc":
-        result.sort((a, b) => parseInt(b.price.replace(/\D/g, '')) - parseInt(a.price.replace(/\D/g, '')));
+        result.sort((a, b) => parseInt((b?.price || '').replace(/\D/g, '') || '0') - parseInt((a?.price || '').replace(/\D/g, '') || '0'));
         break;
       case "title":
-        result.sort((a, b) => a.title.localeCompare(b.title));
+        result.sort((a, b) => (a?.title || '').localeCompare(b?.title || ''));
         break;
       default:
         // Use default order
@@ -761,6 +881,8 @@ const PaintingLibrary = () => {
             {/* Interactive Wall of Paintings */}
             <div className="flex flex-wrap gap-4 justify-center items-center h-full overflow-auto p-4">
               {filteredPaintings.map((painting, index) => {
+                if (!painting || !painting._id) return null;
+                
                 // Calculate varied sizes - larger for featured works
                 const isFeatured = isFavorite(painting._id) || index % 5 === 0;
                 const width = isFeatured ? `${Math.max(220, Math.min(320, 240 + (index % 4) * 20))}px` : `${180 + (index % 3) * 15}px`;
@@ -768,7 +890,7 @@ const PaintingLibrary = () => {
                 
                 return (
                   <motion.div
-                    key={painting._id}
+                    key={painting._id || index}
                     className="relative group cursor-pointer"
                     style={{ 
                       width,
@@ -789,7 +911,7 @@ const PaintingLibrary = () => {
                       rotateZ: angle,
                       transition: { delay: index * 0.04, duration: 0.5 }
                     }}
-                    onClick={() => openModal(filteredPaintings.findIndex(p => p._id === painting._id))}
+                    onClick={() => openModal(filteredPaintings.findIndex(p => p?._id === painting._id))}
                   >
                     {/* Frame and matting effect */}
                     <div 
@@ -806,13 +928,17 @@ const PaintingLibrary = () => {
                       {/* Artwork */}
                       <div className={`relative overflow-hidden ${wallBackground === "dark" ? "border border-gray-700" : "border border-gray-200"}`}>
                         <img
-                          src={painting.image}
-                          alt={painting.title}
+                          src={getPaintingProperty(painting, 'image', '/placeholder-image.jpg')}
+                          alt={getPaintingProperty(painting, 'title', 'Artwork')}
                           className="w-full h-auto object-cover"
                           style={{
                             transition: "all 0.5s ease",
                           }}
                           loading="lazy"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '/placeholder-image.jpg';
+                          }}
                         />
                         
                         {/* Nameplate */}
@@ -820,10 +946,10 @@ const PaintingLibrary = () => {
                           wallBackground === "dark" ? "bg-black bg-opacity-70" : "bg-white bg-opacity-80"
                         } p-2 backdrop-blur-sm transform translate-y-full group-hover:translate-y-0 transition-transform duration-300`}>
                           <p className={`text-xs font-medium ${wallBackground === "dark" ? "text-white" : "text-black"}`}>
-                            {painting.title}
+                            {getPaintingProperty(painting, 'title', 'Untitled')}
                           </p>
                           <p className={`text-xs ${wallBackground === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-                            {painting.medium}
+                            {getPaintingProperty(painting, 'medium', 'Mixed media')}
                           </p>
                         </div>
                       </div>
@@ -848,7 +974,7 @@ const PaintingLibrary = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 w-full max-w-7xl px-4">
           {filteredPaintings.map((painting, index) => (
             <motion.div
-              key={painting._id}
+              key={painting?._id || index}
               className={`${theme.card} p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden`}
               whileHover={{ y: -5 }}
               initial={{ opacity: 0, y: 20 }}
@@ -856,18 +982,18 @@ const PaintingLibrary = () => {
               transition={{ duration: 0.3, delay: index * 0.05 }}
             >
               <div className="relative group">
-            <img
-              src={painting.image}
-              alt={painting.title}
+                <img
+                  src={getPaintingProperty(painting, 'image', '/placeholder-image.jpg')}
+                  alt={getPaintingProperty(painting, 'title', 'Artwork')}
                   className="w-full h-auto mb-4 rounded cursor-pointer transform transition duration-300 group-hover:brightness-90"
-                  onClick={() => openModal(filteredPaintings.findIndex(p => p._id === painting._id))}
+                  onClick={() => openModal(filteredPaintings.findIndex(p => p._id === painting?._id))}
                 />
                 <div className="absolute top-2 right-2 flex space-x-1">
                   <button
-                    onClick={(e) => { e.stopPropagation(); toggleFavorite(painting._id); }}
+                    onClick={(e) => { e.stopPropagation(); toggleFavorite(painting?._id); }}
                     className="p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 text-red-500 transition-all duration-200 shadow-md transform hover:scale-110"
                   >
-                    {isFavorite(painting._id) ? (
+                    {isFavorite(painting?._id) ? (
                       <HeartIconSolid className="w-5 h-5" />
                     ) : (
                       <HeartIcon className="w-5 h-5" />
@@ -876,22 +1002,22 @@ const PaintingLibrary = () => {
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleComparisonPainting(painting); }}
                     className={`p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-md transform hover:scale-110 ${
-                      isInComparison(painting._id) ? "text-indigo-600" : "text-gray-600"
+                      isInComparison(painting?._id) ? "text-indigo-600" : "text-gray-600"
                     }`}
                   >
                     <ArrowsRightLeftIcon className="w-5 h-5" />
                   </button>
                 </div>
               </div>
-            <h2 className="text-lg md:text-xl font-bold mb-2">{painting.title}</h2>
+              <h2 className="text-lg md:text-xl font-bold mb-2">{getPaintingProperty(painting, 'title', 'Untitled')}</h2>
               <p className={`text-sm ${theme.secondary} mb-1`}>
-                <strong>Medium:</strong> {painting.medium}
+                <strong>Medium:</strong> {getPaintingProperty(painting, 'medium', 'Unknown')}
               </p>
               <p className={`text-sm ${theme.secondary} mb-1`}>
-              <strong>Dimensions:</strong> {painting.dimensions}
-            </p>
+                <strong>Dimensions:</strong> {getPaintingProperty(painting, 'dimensions', 'Unknown')}
+              </p>
               <p className="text-sm font-semibold mt-2">
-                <strong>Price:</strong> {painting.price}
+                <strong>Price:</strong> {getPaintingProperty(painting, 'price', 'Price on request')}
               </p>
             </motion.div>
           ))}
@@ -942,19 +1068,19 @@ const PaintingLibrary = () => {
                   <h2 className="text-lg md:text-xl font-bold mb-1">{painting.title}</h2>
                   <div className="grid grid-cols-2 gap-2 mb-2">
                     <p className={`text-sm ${theme.secondary}`}>
-              <strong>Medium:</strong> {painting.medium}
-            </p>
+                      <strong>Medium:</strong> {painting.medium}
+                    </p>
                     <p className={`text-sm ${theme.secondary}`}>
                       <strong>Dimensions:</strong> {painting.dimensions}
                     </p>
                   </div>
                   <p className={`text-sm ${theme.secondary} mb-2`}>
-              <strong>Notes:</strong> {painting.notes}
-            </p>
+                    <strong>Notes:</strong> {painting.notes}
+                  </p>
                   <div className="flex justify-between items-center">
                     <p className="text-lg font-semibold">
-              <strong>Price:</strong> {painting.price}
-            </p>
+                      <strong>Price:</strong> {painting.price}
+                    </p>
                     <button 
                       onClick={() => openModal(filteredPaintings.findIndex(p => p._id === painting._id))}
                       className={`px-3 py-1 ${theme.button} text-white rounded-md text-sm`}
@@ -963,10 +1089,10 @@ const PaintingLibrary = () => {
                     </button>
                   </div>
                 </div>
-          </div>
+              </div>
             </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
       )}
 
       {/* Modal (Popup View) */}
@@ -1060,18 +1186,28 @@ const PaintingLibrary = () => {
                       <div 
                         className="relative h-[30vh] sm:h-[40vh] md:h-[60vh] flex items-center justify-center bg-black bg-opacity-20 rounded-lg overflow-hidden"
                         onMouseDown={handleMouseDown}
+                        onTouchStart={handleMouseDown}
                       >
-                        <img
-                          ref={modalImageRef}
-                          src={selectedPainting.image}
-                          alt={selectedPainting.title}
-                          className="max-w-full max-h-full object-contain transition-transform duration-100"
-                          style={{ transform: `scale(${zoomLevel})` }}
-                          draggable="false"
-                        />
+                        {selectedPainting && (
+                          <img
+                            ref={modalImageRef}
+                            src={getPaintingProperty(selectedPainting, 'image', '/placeholder-image.jpg')}
+                            alt={getPaintingProperty(selectedPainting, 'title', 'Artwork')}
+                            className="max-w-full max-h-full object-contain transition-transform duration-100"
+                            style={{ transform: `scale(${zoomLevel})` }}
+                            draggable="false"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/placeholder-image.jpg';
+                              console.error('Error loading painting image');
+                            }}
+                          />
+                        )}
                         {zoomLevel === 1 ? (
-                          <div className="absolute bottom-3 right-3 text-xs bg-black bg-opacity-50 text-white py-1 px-2 rounded hidden sm:block">
-                            Click and drag to pan when zoomed
+                          <div className="absolute bottom-3 right-3 text-xs bg-black bg-opacity-50 text-white py-1 px-2 rounded">
+                            {window.matchMedia('(pointer: coarse)').matches 
+                              ? 'Pinch to zoom, tap and drag to pan'
+                              : 'Click and drag to pan when zoomed'}
                           </div>
                         ) : null}
                       </div>
@@ -1128,20 +1264,22 @@ const PaintingLibrary = () => {
 
                 {/* Painting Details */}
                 <div className={`w-full md:w-1/3 flex flex-col ${theme.secondary} mt-4 md:mt-0`}>
-                  <h2 className={`text-xl sm:text-2xl font-bold mb-3 sm:mb-4 ${theme.text}`}>{selectedPainting.title}</h2>
+                  <h2 className={`text-xl sm:text-2xl font-bold mb-3 sm:mb-4 ${theme.text}`}>
+                    {getPaintingProperty(selectedPainting, 'title', 'Untitled')}
+                  </h2>
                   
                   <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6 text-sm sm:text-base">
                     <p>
-                      <strong className="font-semibold">Medium:</strong> {selectedPainting.medium}
+                      <strong className="font-semibold">Medium:</strong> {getPaintingProperty(selectedPainting, 'medium', 'Not specified')}
                     </p>
                     <p>
-                      <strong className="font-semibold">Dimensions:</strong> {selectedPainting.dimensions}
+                      <strong className="font-semibold">Dimensions:</strong> {getPaintingProperty(selectedPainting, 'dimensions', 'Not specified')}
                     </p>
                     <p>
-                      <strong className="font-semibold">Notes:</strong> {selectedPainting.notes}
+                      <strong className="font-semibold">Notes:</strong> {getPaintingProperty(selectedPainting, 'notes', 'No notes available')}
                     </p>
                     <p className={`text-lg sm:text-xl font-semibold mt-3 sm:mt-4 ${theme.text}`}>
-                      <strong>Price:</strong> {selectedPainting.price}
+                      <strong>Price:</strong> {getPaintingProperty(selectedPainting, 'price', 'Price on request')}
                     </p>
                   </div>
                   
